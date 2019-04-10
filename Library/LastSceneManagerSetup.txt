@@ -1,0 +1,4 @@
+sceneSetups:
+- path: Assets/Chess/Demo/Demo.unity
+  isLoaded: 1
+  isActive: 1
