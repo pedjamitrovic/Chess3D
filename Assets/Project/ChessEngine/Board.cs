@@ -8,7 +8,7 @@ namespace Assets.Project.ChessEngine
     public class Board
     {
         public byte[] Pieces { get; set; }
-        public ulong[] Pawns { get; set; }
+        public Bitboard[] Pawns { get; set; }
         public byte[] Kings { get; set; }
         public byte[] PieceCount { get; set; }
         public byte[] BigPiecesCount { get; set; }
@@ -27,7 +27,8 @@ namespace Assets.Project.ChessEngine
         public Board()
         {
             Pieces = new byte[BoardSquaresNumber];
-            Pawns = new ulong[PawnsRepresentationNumber];
+            Pawns = new Bitboard[PawnsRepresentationNumber];
+            for (int i = 0; i < PawnsRepresentationNumber; i++) Pawns[i] = new Bitboard();
             Kings = new byte[KingsRepresentationNumber];
             PieceCount = new byte[PieceTypesCount];
             BigPiecesCount = new byte[BigPiecesRepresentationNumber];
