@@ -1,8 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27703.2018
-MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chess 3D", "Chess 3D.csproj", "{43279036-E7A2-702A-F0AE-49402D2A71D6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chess 3D Tests", "..\Chess 3D Tests\Chess 3D Tests.csproj", "{651F2A97-FACF-4A3B-9F9C-B2866F372ABA}"
@@ -24,8 +22,5 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {729EC63F-D444-445D-A121-F0BC4CACD098}
 	EndGlobalSection
 EndGlobal

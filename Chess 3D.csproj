@@ -225,9 +225,15 @@
     <Compile Include="Assets\Project\ChessEngine\Bitboard.cs" />
     <Compile Include="Assets\Project\ChessEngine\Board.cs" />
     <Compile Include="Assets\Project\ChessEngine\Definitions.cs" />
-    <Compile Include="Assets\Project\Demo\Scripts\Main.cs" />
     <Compile Include="Assets\Project\Scripts\ChessUiEngine.cs" />
     <Compile Include="Assets\Project\Scripts\GameController.cs" />
+    <Compile Include="Assets\Project\Scripts\Pieces\Bishop.cs" />
+    <Compile Include="Assets\Project\Scripts\Pieces\King.cs" />
+    <Compile Include="Assets\Project\Scripts\Pieces\Knight.cs" />
+    <Compile Include="Assets\Project\Scripts\Pieces\Pawn.cs" />
+    <Compile Include="Assets\Project\Scripts\Pieces\Piece.cs" />
+    <Compile Include="Assets\Project\Scripts\Pieces\Queen.cs" />
+    <Compile Include="Assets\Project\Scripts\Pieces\Rook.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />
