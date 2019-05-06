@@ -7,18 +7,18 @@ namespace Assets.Project.Scripts
 {
     public class ChessUiEngine : MonoBehaviour
     {
-        //enum Piece { King = 0, Queen = 1, Rook = 2, Knight = 3, Bishop = 4, Pawn = 5 };
-        //private Piece[] setup = new Piece[] { Piece.Rook, Piece.Knight, Piece.Bishop, Piece.Queen, Piece.King, Piece.Bishop, Piece.Knight, Piece.Rook };
         public enum PieceType { None, WhitePawn, WhiteRook, WhiteKnight, WhiteBishop, WhiteQueen, WhiteKing, BlackPawn, BlackRook, BlackKnight, BlackBishop, BlackQueen, BlackKing };
         public BoxCollider bounds;
         public List<Transform> piecePrefabs;
         public Piece[] Pieces { get; set; }
         public Piece SelectedPiece { get; set; }
-        private bool isWhiteTurn;
+        public bool isWhiteTurn;
+        public List<Material> materials;
 
         void Start()
         {
             SetupPieces();
+            FetchMaterials();
             isWhiteTurn = true;
         }
 
@@ -26,15 +26,18 @@ namespace Assets.Project.Scripts
         {
             if (Input.GetMouseButtonDown(0))
             {
+                RaycastHit hit;
                 Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                int cellNumber = RaycastCell(ray);
-                if (IsValidCell(cellNumber))
+                LayerMask mask = LayerMask.GetMask("Pieces");
+                if (Physics.Raycast(ray, out hit, 100, mask))
                 {
-                    if (SelectedPiece == null)
-                    {
-                        SelectPiece(cellNumber);
-                    }
-                    else
+                    SelectPiece(hit.transform.gameObject.GetComponent<Piece>().CellNumber);
+                    return;
+                }
+                else if (SelectedPiece != null)
+                {
+                    int cellNumber = RaycastCell(ray);
+                    if (IsValidCell(cellNumber) && Pieces[cellNumber] == null)
                     {
                         MovePiece(cellNumber);
                     }
@@ -44,9 +47,11 @@ namespace Assets.Project.Scripts
 
         public void SelectPiece(int cellNumber)
         {
+            if (SelectedPiece != null) SelectedPiece.SetOriginalMaterial();
             if (Pieces[cellNumber] == null) return;
             if (Pieces[cellNumber].isWhite != isWhiteTurn) return;
             SelectedPiece = Pieces[cellNumber];
+            SelectedPiece.SetMaterial(materials[0]);
         }
 
         public void MovePiece(int cellNumber)
@@ -58,6 +63,7 @@ namespace Assets.Project.Scripts
                 Vector3 worldPoint = ToWorldPoint(cellNumber);
                 SelectedPiece.transform.position = new Vector3(worldPoint.x, SelectedPiece.transform.position.y, worldPoint.z);
                 SelectedPiece.CellNumber = cellNumber;
+                SelectedPiece.SetOriginalMaterial();
                 isWhiteTurn = !isWhiteTurn;
             }
             SelectedPiece = null;
@@ -126,9 +132,19 @@ namespace Assets.Project.Scripts
             return new Vector3(i * -4 + 14, 1, j * 4 - 14);
         }
 
-        bool IsValidCell(int cellNumber)
+        public bool IsValidCell(int cellNumber)
         {
             return cellNumber >= 0 && cellNumber <= 63;
+        }
+
+        public void FetchMaterials()
+        {
+            Material gold = Resources.Load("Gold") as Material;
+            materials.Add(gold);
+            Material copper = Resources.Load("Copper") as Material;
+            materials.Add(copper);
+            Material steel = Resources.Load("Steel") as Material;
+            materials.Add(steel);
         }
     }
 }

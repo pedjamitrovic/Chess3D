@@ -22,7 +22,7 @@ GameObject:
   - component: {fileID: 33216154755429398}
   - component: {fileID: 23628462205451088}
   - component: {fileID: 114629304922685322}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Black Queen
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -94,4 +94,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 857b9001fd1869a498bea058cbf64a1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  CellNumber: 0
   isWhite: 0
+  uiEngine: {fileID: 0}

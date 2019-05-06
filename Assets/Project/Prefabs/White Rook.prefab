@@ -22,7 +22,7 @@ GameObject:
   - component: {fileID: 33706426119269344}
   - component: {fileID: 23385801290477440}
   - component: {fileID: 114530272156178360}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: White Rook
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -94,4 +94,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 154af2afdb69a9646ad842a9c5a2a46d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  CellNumber: 0
   isWhite: 1
+  uiEngine: {fileID: 0}

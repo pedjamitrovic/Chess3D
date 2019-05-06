@@ -22,7 +22,7 @@ GameObject:
   - component: {fileID: 33541327651997482}
   - component: {fileID: 23547353827085370}
   - component: {fileID: 114505923642910746}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: White Bishop
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -94,4 +94,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 903a15bf9b30ca649917318d3f758d21, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  CellNumber: 0
   isWhite: 1
+  uiEngine: {fileID: 0}

@@ -22,7 +22,7 @@ GameObject:
   - component: {fileID: 33441944802336768}
   - component: {fileID: 23992715128443332}
   - component: {fileID: 114034875696210768}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: White King
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -94,4 +94,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6194213f43196bd45a1c085ec17e4754, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  CellNumber: 0
   isWhite: 1
+  uiEngine: {fileID: 0}
