@@ -13,12 +13,14 @@
     <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>Unity Subset v3.5</TargetFrameworkProfile>
-    <CompilerResponseFile></CompilerResponseFile>
+    <CompilerResponseFile>
+    </CompilerResponseFile>
     <UnityProjectGenerator>VSTU</UnityProjectGenerator>
     <UnityProjectType>Game:1</UnityProjectType>
     <UnityBuildTarget>StandaloneWindows64:19</UnityBuildTarget>
     <UnityVersion>2017.2.0f3</UnityVersion>
-    <RootNamespace></RootNamespace>
+    <RootNamespace>
+    </RootNamespace>
     <LangVersion>4</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -223,7 +225,6 @@
     <Compile Include="Assets\Project\ChessEngine\Bitboard.cs" />
     <Compile Include="Assets\Project\ChessEngine\Board.cs" />
     <Compile Include="Assets\Project\ChessEngine\Definitions.cs" />
-    <Compile Include="Assets\Project\Scripts\ChessUiEngine.cs" />
     <Compile Include="Assets\Project\Scripts\GameController.cs" />
     <Compile Include="Assets\Project\Scripts\Pieces\Bishop.cs" />
     <Compile Include="Assets\Project\Scripts\Pieces\King.cs" />
@@ -232,6 +233,8 @@
     <Compile Include="Assets\Project\Scripts\Pieces\Piece.cs" />
     <Compile Include="Assets\Project\Scripts\Pieces\Queen.cs" />
     <Compile Include="Assets\Project\Scripts\Pieces\Rook.cs" />
+    <Compile Include="Assets\Project\Scripts\Spawner.cs" />
+    <Compile Include="Assets\Project\Scripts\Visualizer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />
