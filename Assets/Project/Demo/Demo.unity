@@ -120,7 +120,7 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 5349172}
-  - component: {fileID: 5349173}
+  - component: {fileID: 5349171}
   m_Layer: 0
   m_Name: GameController
   m_TagString: Untagged
@@ -128,6 +128,21 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &5349171
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 5349170}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ccbaef9ffb1fc43f3acc022aa20d19a7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bounds: {fileID: 370728911}
+  isWhiteTurn: 1
+  spawner: {fileID: 245476864}
+  visualizer: {fileID: 949888105}
 --- !u!4 &5349172
 Transform:
   m_ObjectHideFlags: 0
@@ -141,20 +156,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &5349173
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 5349170}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 76b70c86cdc4e421f917485770365f81, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  uiEngine: {fileID: 1319395494}
-  cell: {fileID: 1290129745}
-  brightSquare: {fileID: 0}
 --- !u!1 &48972257
 GameObject:
   m_ObjectHideFlags: 0
@@ -741,7 +742,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bdb1fb753e30cdd43bcabb1e10de01c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spawner: {fileID: 0}
+  spawner: {fileID: 245476864}
   materials:
   - {fileID: 2100000, guid: e3355e5267673d44a8306e5acdb036aa, type: 2}
   - {fileID: 2100000, guid: 740b364a4c0904c8e9b61c1af5feff8b, type: 2}
@@ -975,7 +976,6 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 1319395495}
-  - component: {fileID: 1319395494}
   m_Layer: 0
   m_Name: Chess
   m_TagString: Untagged
@@ -983,21 +983,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1319395494
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1319395493}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ccbaef9ffb1fc43f3acc022aa20d19a7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  bounds: {fileID: 370728911}
-  isWhiteTurn: 0
-  spawner: {fileID: 0}
-  visualizer: {fileID: 0}
 --- !u!4 &1319395495
 Transform:
   m_ObjectHideFlags: 0
