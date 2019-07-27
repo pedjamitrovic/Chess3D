@@ -55,9 +55,10 @@ namespace Assets.Project.ChessEngine
 
         private static ulong Get64BitRandom(ulong minValue = ulong.MinValue, ulong maxValue = ulong.MaxValue)
         {
-            byte[] buffer = new byte[sizeof(ulong)];
-            rnd.NextBytes(buffer);
-            return BitConverter.ToUInt64(buffer, 0) % (maxValue - minValue + 1) + minValue;
+            byte[] buf = new byte[8];
+            rnd.NextBytes(buf);
+            ulong longRand = BitConverter.ToUInt64(buf, 0);
+            return longRand % (maxValue - minValue) + minValue;
         }
     }
 }
