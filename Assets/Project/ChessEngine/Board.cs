@@ -107,7 +107,6 @@ namespace Assets.Project.ChessEngine
                     square = ConvertToSq120(file, rank);
                     piece = Pieces[square];
                     sb.Append(piece.GetLabel().AlignCenter(3));
-                    //sb.AppendFormat("{0, 3}", piece.GetLabel());
                 }
                 sb.Append(Environment.NewLine);
             }
@@ -115,7 +114,6 @@ namespace Assets.Project.ChessEngine
             for (File file = File.FileA; file <= File.FileH; ++file)
             {
                 sb.Append(file.GetLabel().AlignCenter(3));
-                //sb.AppendFormat("{0, 3}", file.GetLabel());
             }
             sb.Append(Environment.NewLine + Environment.NewLine);
             sb.Append("OnTurn: " + OnTurn.GetLabel() + Environment.NewLine);
@@ -143,11 +141,22 @@ namespace Assets.Project.ChessEngine
 
         private static readonly int[] SqIndexes120To64;
         private static readonly int[] SqIndexes64To120;
+        private static readonly int[] FileBoard;
+        private static readonly int[] RankBoard;
 
         static Board()
         {
             SqIndexes120To64 = new int[120];
             SqIndexes64To120 = new int[64];
+            InitSqIndexes();
+
+            FileBoard = new int[BoardSquaresNumber];
+            RankBoard = new int[BoardSquaresNumber];
+            InitFileRankBoards();
+        }
+
+        private static void InitSqIndexes()
+        {
             for (int i = 0; i < 120; i++) SqIndexes120To64[i] = 64;
             for (int i = 0; i < 64; i++) SqIndexes64To120[i] = 0;
 
@@ -159,6 +168,25 @@ namespace Assets.Project.ChessEngine
                     currSq = ConvertToSq120(f, r);
                     SqIndexes64To120[sq64] = currSq;
                     SqIndexes120To64[currSq] = sq64;
+                }
+            }
+        }
+
+        private static void InitFileRankBoards()
+        {
+            for (int i = 0; i < BoardSquaresNumber; ++i)
+            {
+                FileBoard[i] = (int)Square.None;
+                RankBoard[i] = (int)Square.None;
+            }
+
+            for (Rank r = Rank.Rank1; r <= Rank.Rank8; ++r)
+            {
+                for (File f = File.FileA; f <= File.FileH; ++f)
+                {
+                    int sq = ConvertToSq120(f, r);
+                    FileBoard[sq] = (int)f;
+                    RankBoard[sq] = (int)r;
                 }
             }
         }
