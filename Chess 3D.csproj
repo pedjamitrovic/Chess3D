@@ -225,6 +225,7 @@
     <Compile Include="Assets\Project\ChessEngine\Bitboard.cs" />
     <Compile Include="Assets\Project\ChessEngine\Board.cs" />
     <Compile Include="Assets\Project\ChessEngine\Definitions.cs" />
+    <Compile Include="Assets\Project\ChessEngine\Exceptions\BoardIntegrityException.cs" />
     <Compile Include="Assets\Project\ChessEngine\Exceptions\FENFormatException.cs" />
     <Compile Include="Assets\Project\ChessEngine\FENParser.cs" />
     <Compile Include="Assets\Project\ChessEngine\HashGenerator.cs" />

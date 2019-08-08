@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Assets.Project.ChessEngine.Exceptions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -94,15 +95,124 @@ namespace Assets.Project.ChessEngine
             }
         }
 
+        public void CheckIntegrity()
+        {
+            int[] TempPieceCount = new int[PieceTypesCount];
+            int[] TempBigPiecesCount = new int[BigPiecesRepresentationNumber];
+            int[] TempMajorPiecesCount = new int[MajorPiecesRepresentationNumber];
+            int[] TempMinorPiecesCount = new int[MinorPiecesRepresentationNumber];
+            int[] TempMaterial = new int[2];
+
+            for (SquareContent piece = SquareContent.WhitePawn; piece <= SquareContent.BlackKing; ++piece)
+            {
+                for (int i = 0; i < PieceCount[(int)piece]; ++i)
+                {
+                    Square sq120 = PieceList[(int)piece, i];
+                    if (Pieces[(int)sq120] != piece) throw new BoardIntegrityException("Piece type found on square " + (int)sq120
+                        + " was " + Pieces[(int)sq120] + ", expected " + piece);
+                }
+            }
+
+            for (int sq64 = 0; sq64 < 64; ++sq64)
+            {
+                int sq120 = Sq120(sq64);
+                SquareContent piece = Pieces[sq120];
+                if (piece == SquareContent.None) continue;
+
+                ++TempPieceCount[(int)piece];
+                if (piece.IsBig()) ++TempBigPiecesCount[(int)piece.GetColor()];
+                if (piece.IsMajor()) ++TempMajorPiecesCount[(int)piece.GetColor()];
+                if (piece.IsMinor()) ++TempMinorPiecesCount[(int)piece.GetColor()];
+
+                TempMaterial[(int)piece.GetColor()] += piece.GetValue();
+            }
+
+            for (SquareContent piece = SquareContent.WhitePawn; piece <= SquareContent.BlackKing; ++piece)
+            {
+                if (TempPieceCount[(int)piece] != PieceCount[(int)piece]) throw new BoardIntegrityException("Piece type " + (int)piece + " count found was "
+                    + PieceCount[(int)piece] + ", expected " + TempPieceCount[(int)piece]);
+            }
+
+            if (Pawns[(int)Color.White].CountBit() != PieceCount[(int)SquareContent.WhitePawn]
+                ||
+                Pawns[(int)Color.Black].CountBit() != PieceCount[(int)SquareContent.BlackPawn]
+                ||
+                Pawns[(int)Color.Both].CountBit() != (PieceCount[(int)SquareContent.WhitePawn] + PieceCount[(int)SquareContent.BlackPawn]))
+            {
+                throw new BoardIntegrityException("Bitboard pawn count inequality");
+            }
+
+            for (int sq64 = 0; sq64 < 64; ++sq64)
+            {
+                if (Pawns[(int)Color.White].IsSet(sq64) && Pieces[Sq120(sq64)] != SquareContent.WhitePawn)
+                    throw new BoardIntegrityException("Bitboard bit set on square " + sq64 + ", unexpected square content " + (int)Pieces[Sq120(sq64)] + " found");
+                if (Pawns[(int)Color.Black].IsSet(sq64) && Pieces[Sq120(sq64)] != SquareContent.BlackPawn)
+                    throw new BoardIntegrityException("Bitboard bit set on square " + sq64 + ", unexpected square content " + (int)Pieces[Sq120(sq64)] + " found");
+                if (Pawns[(int)Color.Both].IsSet(sq64) && (Pieces[Sq120(sq64)] != SquareContent.WhitePawn && Pieces[Sq120(sq64)] != SquareContent.BlackPawn))
+                    throw new BoardIntegrityException("Bitboard bit set on square " + sq64 + ", unexpected square content " + (int)Pieces[Sq120(sq64)] + " found");
+            }
+
+            if (TempMaterial[(int)Color.White] != Material[(int)Color.White]
+                ||
+                TempMaterial[(int)Color.Black] != Material[(int)Color.Black])
+            {
+                throw new BoardIntegrityException("Material inequality");
+            }
+
+            if (TempBigPiecesCount[(int)Color.White] != BigPiecesCount[(int)Color.White]
+                ||
+                TempBigPiecesCount[(int)Color.Black] != BigPiecesCount[(int)Color.Black])
+            {
+                throw new BoardIntegrityException("Big pieces count inequality");
+            }
+
+            if (TempMajorPiecesCount[(int)Color.White] != MajorPiecesCount[(int)Color.White]
+                ||
+                TempMajorPiecesCount[(int)Color.Black] != MajorPiecesCount[(int)Color.Black])
+            {
+                throw new BoardIntegrityException("Major pieces count inequality");
+            }
+
+            if (TempMinorPiecesCount[(int)Color.White] != MinorPiecesCount[(int)Color.White]
+                ||
+                TempMinorPiecesCount[(int)Color.Black] != MinorPiecesCount[(int)Color.Black])
+            {
+                throw new BoardIntegrityException("Minor pieces count inequality");
+            }
+
+            if (OnTurn != Side.White && OnTurn != Side.Black)
+            {
+                throw new BoardIntegrityException("Player on turn can be either white or black, found " + (int)OnTurn);
+            }
+
+            if (HashGenerator.CalculateStateKey(this) != StateKey)
+            {
+                throw new BoardIntegrityException("Expected state key " + HashGenerator.CalculateStateKey(this) + ", found " + StateKey);
+            }
+
+            if (EnPassant != Square.None &&
+                ((RankBoard[(int)EnPassant] != (int)Rank.Rank6 && OnTurn == Side.White) ||
+                 (RankBoard[(int)EnPassant] != (int)Rank.Rank3 && OnTurn == Side.Black))
+                )
+            {
+
+            }
+
+            if (Pieces[(int)Kings[(int)Color.White]] != SquareContent.WhiteKing || Pieces[(int)Kings[(int)Color.Black]] != SquareContent.BlackKing)
+            {
+                throw new BoardIntegrityException("King position inconsistency");
+            }
+        }
+
         public override string ToString()
         {
             int square;
             SquareContent piece;
             StringBuilder sb = new StringBuilder(Environment.NewLine + "Board: " + Environment.NewLine + Environment.NewLine);
-            for(Rank rank = Rank.Rank8; rank >= Rank.Rank1; --rank)
+            for (Rank rank = Rank.Rank8; rank >= Rank.Rank1; --rank)
             {
                 sb.Append(rank.GetLabel() + "  ");
-                for(File file = File.FileA; file <= File.FileH; ++file)
+                for (File file = File.FileA; file <= File.FileH; ++file)
                 {
                     square = ConvertToSq120(file, rank);
                     piece = Pieces[square];

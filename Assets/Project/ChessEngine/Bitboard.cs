@@ -28,6 +28,35 @@ namespace Assets.Project.ChessEngine
             while(val > 0) { count++; val &= val - 1; }
             return count;
         }
+        public bool IsSet(int position)
+        {
+            if (position < 0 || position > 63) throw new IndexOutOfRangeException("Bitboard has indexes of range [0..63], provided: " + position);
+            return (this.Value & SetMask[position]) > 0;
+        }
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder(Environment.NewLine + "Bitboard: " + Environment.NewLine + Environment.NewLine);
+            ulong mask = 1;
+            
+            int sq120 = 0;
+            int sq64 = 0;
+
+            for (Rank r = Rank.Rank8; r >= Rank.Rank1; --r)
+            {
+                for (File f = File.FileA; f <= File.FileH; ++f)
+                {
+                    sq120 = Board.ConvertToSq120(f, r);
+                    sq64 = Board.Sq64(sq120);
+
+                    if (((mask << sq64) & Value) != 0) sb.Append("X");
+                    else sb.Append("-");
+                }
+                sb.Append(Environment.NewLine);
+            }
+            sb.Append(Environment.NewLine + Environment.NewLine);
+
+            return sb.ToString();
+        }
 
         private static ulong[] SetMask { get; set; }
         private static ulong[] ClearMask { get; set; }
