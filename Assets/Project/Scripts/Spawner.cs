@@ -1,14 +1,10 @@
-﻿using Assets.Project.Scripts.Pieces;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Assets.Project.Scripts
 {
     public class Spawner: MonoBehaviour
     {
-        public Transform highlightedFields;
+        /*public Transform highlightedFields;
         public List<Transform> piecePrefabs;
         public Transform highlightedFieldPrefab;
 
@@ -49,6 +45,6 @@ namespace Assets.Project.Scripts
             int j = cellNumber % 8;
             int i = cellNumber / 8;
             return new Vector3(i * -4 + 14, 1, j * 4 - 14);
-        }
+        }*/
     }
 }

@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using Assets.Project.ChessEngine.Pieces;
 
 namespace Assets.Project.ChessEngine
 {
@@ -33,18 +31,18 @@ namespace Assets.Project.ChessEngine
         public static ulong CalculateStateKey(Board board)
         {
             ulong finalKey = 0;
-            SquareContent piece;
+            Piece piece;
 
             for (int sq = 0; sq < Board.BoardSquaresNumber; ++sq)
             {
                 piece = board.Pieces[sq];
-                if (piece != SquareContent.None && piece != SquareContent.OffLimits)
+                if (piece != null && !(piece is OffLimits))
                 {
-                    finalKey ^= pieceKeys[(byte)piece, sq];
+                    finalKey ^= pieceKeys[(int)piece.GetPieceType(), sq];
                 }
             }
 
-            if (board.OnTurn == Side.White) finalKey ^= sideKey;
+            if (board.OnTurn == Color.White) finalKey ^= sideKey;
 
             if (board.EnPassant != Square.None) finalKey ^= pieceKeys[0, (byte)board.EnPassant];
 

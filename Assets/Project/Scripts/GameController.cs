@@ -1,4 +1,4 @@
-﻿using Assets.Project.Scripts.Pieces;
+﻿using Assets.Project.ChessEngine.Pieces;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,7 +8,7 @@ namespace Assets.Project.Scripts
     public enum PieceType { None, WhitePawn, WhiteRook, WhiteKnight, WhiteBishop, WhiteQueen, WhiteKing, BlackPawn, BlackRook, BlackKnight, BlackBishop, BlackQueen, BlackKing };
     public class GameController : MonoBehaviour
     {
-        public BoxCollider bounds;
+        /*public BoxCollider bounds;
         public Piece[] Pieces { get; set; }
         public Piece SelectedPiece { get; set; }
         public bool isWhiteTurn;
@@ -124,6 +124,6 @@ namespace Assets.Project.Scripts
         {
             return cellNumber >= 0 && cellNumber <= 63;
         }
-        
+        */
     }
 }

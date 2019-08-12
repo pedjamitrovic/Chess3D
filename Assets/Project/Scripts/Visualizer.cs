@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Assets.Project.Scripts.Pieces;
 using UnityEngine;
 
 namespace Assets.Project.Scripts
@@ -15,7 +14,7 @@ namespace Assets.Project.Scripts
         {
         }
 
-        public void HighlightFields(List<int> cellNumbers)
+        /*public void HighlightFields(List<int> cellNumbers)
         {
             foreach (var cellNumber in cellNumbers)
             {
@@ -33,6 +32,6 @@ namespace Assets.Project.Scripts
         public void RemoveHighlightFromPiece(Piece piece)
         {
             piece.GetComponent<Renderer>().material = piece.isWhite ? materials[(int)Materials.White] : materials[(int)Materials.Black];
-        }
+        }*/
     }
 }

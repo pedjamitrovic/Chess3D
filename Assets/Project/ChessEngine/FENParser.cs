@@ -1,8 +1,5 @@
 ﻿using Assets.Project.ChessEngine.Exceptions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using Assets.Project.ChessEngine.Pieces;
 
 namespace Assets.Project.ChessEngine
 {
@@ -14,7 +11,7 @@ namespace Assets.Project.ChessEngine
             File file = File.FileA;
             Rank rank = Rank.Rank8;
             int i = 0;
-            SquareContent piece = 0;
+            PieceType pieceType;
 
             Board board = new Board();
 
@@ -23,18 +20,18 @@ namespace Assets.Project.ChessEngine
                 count = 1;
                 switch (fen[i])
                 {
-                    case 'p': piece = SquareContent.BlackPawn; break;
-                    case 'n': piece = SquareContent.BlackKnight; break;
-                    case 'b': piece = SquareContent.BlackBishop; break;
-                    case 'r': piece = SquareContent.BlackRook; break;
-                    case 'k': piece = SquareContent.BlackKing; break;
-                    case 'q': piece = SquareContent.BlackQueen; break;
-                    case 'P': piece = SquareContent.WhitePawn; break;
-                    case 'N': piece = SquareContent.WhiteKnight; break;
-                    case 'B': piece = SquareContent.WhiteBishop; break;
-                    case 'R': piece = SquareContent.WhiteRook; break;
-                    case 'K': piece = SquareContent.WhiteKing; break;
-                    case 'Q': piece = SquareContent.WhiteQueen; break;
+                    case 'p': pieceType = PieceType.BlackPawn; break;
+                    case 'n': pieceType = PieceType.BlackKnight; break;
+                    case 'b': pieceType = PieceType.BlackBishop; break;
+                    case 'r': pieceType = PieceType.BlackRook; break;
+                    case 'k': pieceType = PieceType.BlackKing; break;
+                    case 'q': pieceType = PieceType.BlackQueen; break;
+                    case 'P': pieceType = PieceType.WhitePawn; break;
+                    case 'N': pieceType = PieceType.WhiteKnight; break;
+                    case 'B': pieceType = PieceType.WhiteBishop; break;
+                    case 'R': pieceType = PieceType.WhiteRook; break;
+                    case 'K': pieceType = PieceType.WhiteKing; break;
+                    case 'Q': pieceType = PieceType.WhiteQueen; break;
 
                     case '1':
                     case '2':
@@ -44,7 +41,7 @@ namespace Assets.Project.ChessEngine
                     case '6':
                     case '7':
                     case '8':
-                        piece = SquareContent.None;
+                        pieceType = PieceType.None;
                         count = fen[i] - '0';
                         break;
 
@@ -63,15 +60,15 @@ namespace Assets.Project.ChessEngine
                 {
                     sq64 = (int)rank * 8 + (int)file;
                     sq120 = Board.Sq120(sq64);
-                    if (piece != SquareContent.None)
+                    if (pieceType != PieceType.None)
                     {
-                        board.Pieces[sq120] = piece;
+                        board.Pieces[sq120] = Piece.CreatePiece(pieceType, (Square)sq120);
                     }
                     file++;
                 }
             }
 
-            board.OnTurn = (fen[i] == 'w') ? Side.White : Side.Black;
+            board.OnTurn = (fen[i] == 'w') ? Color.White : Color.Black;
             i += 2;
 
             for (int j = 0; fen[i] != ' ' && j < 4; ++j, ++i)

@@ -1,4 +1,5 @@
 ﻿using Assets.Project.ChessEngine.Exceptions;
+using Assets.Project.ChessEngine.Pieces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +9,7 @@ namespace Assets.Project.ChessEngine
 {
     public class Board
     {
-        public SquareContent[] Pieces { get; set; }
+        public Piece[] Pieces { get; set; }
         public Bitboard[] Pawns { get; set; }
         public Square[] Kings { get; set; }
         public int[] PieceCount { get; set; }
@@ -18,7 +19,7 @@ namespace Assets.Project.ChessEngine
         public int[] Material { get; set; }
         public Square[,] PieceList { get; set; }
 
-        public Side OnTurn { get; set; }
+        public Color OnTurn { get; set; }
         public int FiftyMove { get; set; }
         public Square EnPassant { get; set; }
         public int CastlePerm { get; set; }
@@ -29,15 +30,15 @@ namespace Assets.Project.ChessEngine
 
         public Board()
         {
-            Pieces = new SquareContent[BoardSquaresNumber];
-            for (int i = 0; i < BoardSquaresNumber; ++i) Pieces[i] = SquareContent.OffLimits;
-            for (int i = 0; i < 64; ++i) Pieces[SqIndexes64To120[i]] = SquareContent.None;
+            Pieces = new Piece[BoardSquaresNumber];
+            for (int i = 0; i < BoardSquaresNumber; ++i) Pieces[i] = OffLimits.Instance;
+            for (int i = 0; i < 64; ++i) Pieces[SqIndexes64To120[i]] = null;
 
             Pawns = new Bitboard[PawnsRepresentationNumber];
             for (int i = 0; i < PawnsRepresentationNumber; ++i) Pawns[i] = new Bitboard();
 
             Kings = new Square[KingsRepresentationNumber];
-            Kings[(int)Side.White] = Kings[(int)Side.Black] = Square.None;
+            Kings[(int)Color.White] = Kings[(int)Color.Black] = Square.None;
 
             PieceCount = new int[PieceTypesCount];
 
@@ -47,7 +48,7 @@ namespace Assets.Project.ChessEngine
             Material = new int[2];
             PieceList = new Square[PieceTypesCount, MaxCountOfPieceType];
 
-            OnTurn = Side.Both;
+            OnTurn = Color.Both;
             FiftyMove = 0;
             EnPassant = Square.None;
             CastlePerm = 0;
@@ -60,37 +61,26 @@ namespace Assets.Project.ChessEngine
 
         public void UpdateListsAndMaterial()
         {
-            Color color;
-            SquareContent piece;
-
             for (int i = 0; i < BoardSquaresNumber; ++i)
             {
-                piece = Pieces[i];
-                if (piece != SquareContent.OffLimits && piece != SquareContent.None)
+                Piece piece = Pieces[i];
+                if (piece != null && !(piece is OffLimits))
                 {
-                    color = piece.GetColor();
+                    if (piece.IsBig()) BigPiecesCount[(int)piece.Color]++;
+                    if (piece.IsMajor()) MajorPiecesCount[(int)piece.Color]++;
+                    if (piece.IsMinor()) MinorPiecesCount[(int)piece.Color]++;
 
-                    if (piece.IsBig()) BigPiecesCount[(int)color]++;
-                    if (piece.IsMajor()) MajorPiecesCount[(int)color]++;
-                    if (piece.IsMinor()) MinorPiecesCount[(int)color]++;
+                    PieceList[(int)piece.GetPieceType(), PieceCount[(int)piece.GetPieceType()]] = (Square)i;
+                    ++PieceCount[(int)piece.GetPieceType()];
 
-                    PieceList[(int)piece, PieceCount[(int)piece]] = (Square)i;
-                    ++PieceCount[(int)piece];
-
-                    if (piece == SquareContent.WhiteKing) Kings[(int)Color.White] = (Square)i;
-                    else if (piece == SquareContent.BlackKing) Kings[(int)Color.Black] = (Square)i;
-                    else if (piece == SquareContent.WhitePawn)
+                    if (piece is King) Kings[(int)piece.Color] = (Square)i;
+                    else if (piece is Pawn)
                     {
-                        Pawns[(int)Color.White].SetBit(Sq64(i));
-                        Pawns[(int)Color.Both].SetBit(Sq64(i));
-                    }
-                    else if (piece == SquareContent.BlackPawn)
-                    {
-                        Pawns[(int)Color.Black].SetBit(Sq64(i));
+                        Pawns[(int)piece.Color].SetBit(Sq64(i));
                         Pawns[(int)Color.Both].SetBit(Sq64(i));
                     }
 
-                    Material[(int)color] += piece.GetValue();
+                    Material[(int)piece.Color] += piece.Value;
                 }
             }
         }
@@ -103,53 +93,53 @@ namespace Assets.Project.ChessEngine
             int[] TempMinorPiecesCount = new int[MinorPiecesRepresentationNumber];
             int[] TempMaterial = new int[2];
 
-            for (SquareContent piece = SquareContent.WhitePawn; piece <= SquareContent.BlackKing; ++piece)
+            for (PieceType pieceType = PieceType.WhitePawn; pieceType <= PieceType.BlackKing; ++pieceType)
             {
-                for (int i = 0; i < PieceCount[(int)piece]; ++i)
+                for (int i = 0; i < PieceCount[(int)pieceType]; ++i)
                 {
-                    Square sq120 = PieceList[(int)piece, i];
-                    if (Pieces[(int)sq120] != piece) throw new BoardIntegrityException("Piece type found on square " + (int)sq120
-                        + " was " + Pieces[(int)sq120] + ", expected " + piece);
+                    Square sq120 = PieceList[(int)pieceType, i];
+                    if (Pieces[(int)sq120].GetPieceType() != pieceType) throw new BoardIntegrityException("Piece type found on square " + (int)sq120
+                        + " was " + Pieces[(int)sq120] + ", expected " + pieceType);
                 }
             }
 
             for (int sq64 = 0; sq64 < 64; ++sq64)
             {
                 int sq120 = Sq120(sq64);
-                SquareContent piece = Pieces[sq120];
-                if (piece == SquareContent.None) continue;
+                Piece piece = Pieces[sq120];
+                if (piece == null) continue;
 
-                ++TempPieceCount[(int)piece];
-                if (piece.IsBig()) ++TempBigPiecesCount[(int)piece.GetColor()];
-                if (piece.IsMajor()) ++TempMajorPiecesCount[(int)piece.GetColor()];
-                if (piece.IsMinor()) ++TempMinorPiecesCount[(int)piece.GetColor()];
+                ++TempPieceCount[(int)piece.GetPieceType()];
+                if (piece.IsBig()) ++TempBigPiecesCount[(int)piece.Color];
+                if (piece.IsMajor()) ++TempMajorPiecesCount[(int)piece.Color];
+                if (piece.IsMinor()) ++TempMinorPiecesCount[(int)piece.Color];
 
-                TempMaterial[(int)piece.GetColor()] += piece.GetValue();
+                TempMaterial[(int)piece.Color] += piece.Value;
             }
 
-            for (SquareContent piece = SquareContent.WhitePawn; piece <= SquareContent.BlackKing; ++piece)
+            for (PieceType pieceType = PieceType.WhitePawn; pieceType <= PieceType.BlackKing; ++pieceType)
             {
-                if (TempPieceCount[(int)piece] != PieceCount[(int)piece]) throw new BoardIntegrityException("Piece type " + (int)piece + " count found was "
-                    + PieceCount[(int)piece] + ", expected " + TempPieceCount[(int)piece]);
+                if (TempPieceCount[(int)pieceType] != PieceCount[(int)pieceType]) throw new BoardIntegrityException("Piece type " + (int)pieceType + " count found was "
+                    + PieceCount[(int)pieceType] + ", expected " + TempPieceCount[(int)pieceType]);
             }
 
-            if (Pawns[(int)Color.White].CountBit() != PieceCount[(int)SquareContent.WhitePawn]
+            if (Pawns[(int)Color.White].CountBit() != PieceCount[(int)PieceType.WhitePawn]
                 ||
-                Pawns[(int)Color.Black].CountBit() != PieceCount[(int)SquareContent.BlackPawn]
+                Pawns[(int)Color.Black].CountBit() != PieceCount[(int)PieceType.BlackPawn]
                 ||
-                Pawns[(int)Color.Both].CountBit() != (PieceCount[(int)SquareContent.WhitePawn] + PieceCount[(int)SquareContent.BlackPawn]))
+                Pawns[(int)Color.Both].CountBit() != (PieceCount[(int)PieceType.WhitePawn] + PieceCount[(int)PieceType.BlackPawn]))
             {
                 throw new BoardIntegrityException("Bitboard pawn count inequality");
             }
 
             for (int sq64 = 0; sq64 < 64; ++sq64)
             {
-                if (Pawns[(int)Color.White].IsSet(sq64) && Pieces[Sq120(sq64)] != SquareContent.WhitePawn)
-                    throw new BoardIntegrityException("Bitboard bit set on square " + sq64 + ", unexpected square content " + (int)Pieces[Sq120(sq64)] + " found");
-                if (Pawns[(int)Color.Black].IsSet(sq64) && Pieces[Sq120(sq64)] != SquareContent.BlackPawn)
-                    throw new BoardIntegrityException("Bitboard bit set on square " + sq64 + ", unexpected square content " + (int)Pieces[Sq120(sq64)] + " found");
-                if (Pawns[(int)Color.Both].IsSet(sq64) && (Pieces[Sq120(sq64)] != SquareContent.WhitePawn && Pieces[Sq120(sq64)] != SquareContent.BlackPawn))
-                    throw new BoardIntegrityException("Bitboard bit set on square " + sq64 + ", unexpected square content " + (int)Pieces[Sq120(sq64)] + " found");
+                if (Pawns[(int)Color.White].IsSet(sq64) && Pieces[Sq120(sq64)].GetPieceType() != PieceType.WhitePawn)
+                    throw new BoardIntegrityException("Bitboard bit set on square " + sq64 + ", unexpected square content " + Pieces[Sq120(sq64)].GetPieceType() + " found");
+                if (Pawns[(int)Color.Black].IsSet(sq64) && Pieces[Sq120(sq64)].GetPieceType() != PieceType.BlackPawn)
+                    throw new BoardIntegrityException("Bitboard bit set on square " + sq64 + ", unexpected square content " + Pieces[Sq120(sq64)].GetPieceType() + " found");
+                if (Pawns[(int)Color.Both].IsSet(sq64) && (Pieces[Sq120(sq64)].GetPieceType() != PieceType.WhitePawn && Pieces[Sq120(sq64)].GetPieceType() != PieceType.BlackPawn))
+                    throw new BoardIntegrityException("Bitboard bit set on square " + sq64 + ", unexpected square content " + Pieces[Sq120(sq64)].GetPieceType() + " found");
             }
 
             if (TempMaterial[(int)Color.White] != Material[(int)Color.White]
@@ -180,7 +170,7 @@ namespace Assets.Project.ChessEngine
                 throw new BoardIntegrityException("Minor pieces count inequality");
             }
 
-            if (OnTurn != Side.White && OnTurn != Side.Black)
+            if (OnTurn != Color.White && OnTurn != Color.Black)
             {
                 throw new BoardIntegrityException("Player on turn can be either white or black, found " + (int)OnTurn);
             }
@@ -191,23 +181,113 @@ namespace Assets.Project.ChessEngine
             }
 
             if (EnPassant != Square.None &&
-                ((RankBoard[(int)EnPassant] != (int)Rank.Rank6 && OnTurn == Side.White) ||
-                 (RankBoard[(int)EnPassant] != (int)Rank.Rank3 && OnTurn == Side.Black))
+                ((RankBoard[(int)EnPassant] != (int)Rank.Rank6 && OnTurn == Color.White) ||
+                 (RankBoard[(int)EnPassant] != (int)Rank.Rank3 && OnTurn == Color.Black))
                 )
             {
 
             }
 
-            if (Pieces[(int)Kings[(int)Color.White]] != SquareContent.WhiteKing || Pieces[(int)Kings[(int)Color.Black]] != SquareContent.BlackKing)
+            if (Pieces[(int)Kings[(int)Color.White]].GetPieceType() != PieceType.WhiteKing || Pieces[(int)Kings[(int)Color.Black]].GetPieceType() != PieceType.BlackKing)
             {
                 throw new BoardIntegrityException("King position inconsistency");
             }
         }
 
+        public static readonly int[] KnDirection = { -8, -19, -21, -12, 8, 19, 21, 12 };
+        public static readonly int[] RkDirection = { -1, -10, 1, 10 };
+        public static readonly int[] BiDirection = { -9, -11, 11, 9 };
+        public static readonly int[] KiDirection = { -1, -10, 1, 10, -9, -11, 11, 9 };
+        
+        public bool IsSquareAttacked(int sq, Color side)
+        {
+            CheckIntegrity(); // TODO: remove CheckIntegrity for perfomance boost
+
+            // pawns
+            if (side == Color.White)
+            {
+                Piece piece = Pieces[sq - 11];
+                if (piece is Pawn && piece.Color == Color.White) return true;
+                piece = Pieces[sq - 9];
+                if (piece is Pawn && piece.Color == Color.White) return true;
+            }
+            else
+            {
+                Piece piece = Pieces[sq + 11];
+                if (piece is Pawn && piece.Color == Color.Black) return true;
+                piece = Pieces[sq + 9];
+                if (piece is Pawn && piece.Color == Color.Black) return true;
+            }
+
+            // knights
+            for (int i = 0; i < 8; ++i)
+            {
+                Piece piece = Pieces[sq + KnDirection[i]];
+                if (piece is Knight && piece.Color == side)
+                {
+                    return true;
+                }
+            }
+
+            // rooks, queens
+            for (int i = 0; i < 4; ++i)
+            {
+                int direction = RkDirection[i];
+                int tempSq = sq + direction;
+                Piece piece = Pieces[tempSq];
+                while (!(piece is OffLimits))
+                {
+                    if (piece != null)
+                    {
+                        if ((piece is Rook || piece is Queen) && piece.Color == side)
+                        {
+                            return true;
+                        }
+                        break;
+                    }
+                    tempSq += direction;
+                    piece = Pieces[tempSq];
+                }
+            }
+
+            // bishops, queens
+            for (int i = 0; i < 4; ++i)
+            {
+                int direction = BiDirection[i];
+                int tempSq = sq + direction;
+                Piece piece = Pieces[tempSq];
+                while (!(piece is OffLimits))
+                {
+                    if (piece != null)
+                    {
+                        if ((piece is Bishop || piece is Queen) && piece.Color == side)
+                        {
+                            return true;
+                        }
+                        break;
+                    }
+                    tempSq += direction;
+                    piece = Pieces[tempSq];
+                }
+            }
+
+            // kings
+            for (int i = 0; i < 8; ++i)
+            {
+                Piece piece = Pieces[sq + KiDirection[i]];
+                if (piece is King && piece.Color == side)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         public override string ToString()
         {
             int square;
-            SquareContent piece;
+            Piece piece;
             StringBuilder sb = new StringBuilder(Environment.NewLine + "Board: " + Environment.NewLine + Environment.NewLine);
             for (Rank rank = Rank.Rank8; rank >= Rank.Rank1; --rank)
             {

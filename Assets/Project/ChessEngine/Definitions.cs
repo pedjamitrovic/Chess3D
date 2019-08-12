@@ -1,14 +1,12 @@
-﻿using System.Text;
-
-namespace Assets.Project.ChessEngine
+﻿namespace Assets.Project.ChessEngine
 {
-    public enum SquareContent { None, WhitePawn, WhiteKnight, WhiteBishop, WhiteRook, WhiteQueen, WhiteKing, BlackPawn, BlackKnight, BlackBishop, BlackRook, BlackQueen, BlackKing, OffLimits };
+    public enum PieceType { None, WhitePawn, WhiteKnight, WhiteBishop, WhiteRook, WhiteQueen, WhiteKing, BlackPawn, BlackKnight, BlackBishop, BlackRook, BlackQueen, BlackKing, OffLimits };
     public enum File { FileA, FileB, FileC, FileD, FileE, FileF, FileG, FileH };
     public enum Rank { Rank1, Rank2, Rank3, Rank4, Rank5, Rank6, Rank7, Rank8 };
     public enum Color { White, Black, Both };
     public enum Square
     {
-        B1 = 21, C1, D1, E1, F1, G1, H1,
+        A1 = 21, B1, C1, D1, E1, F1, G1, H1,
         A2 = 31, B2, C2, D2, E2, F2, G2, H2,
         A3 = 41, B3, C3, D3, E3, F3, G3, H3,
         A4 = 51, B4, C4, D4, E4, F4, G4, H4,
@@ -18,9 +16,8 @@ namespace Assets.Project.ChessEngine
         A8 = 91, B8, C8, D8, E8, F8, G8, H8, None = 99,
     };
     public enum CastlingPermit { WhiteKingCastling = 1, WhiteQueenCastling = 2, BlackKingCastling = 4, BlackQueenCastling = 8 };
-    public enum Side { White, Black, Both };
 
-    public static class SquareContentMethods
+    public static class PieceTypeMethods
     {
         public static Color[] PieceColor = { Color.Both, Color.White, Color.White, Color.White, Color.White, Color.White, Color.White, Color.Black, Color.Black, Color.Black, Color.Black, Color.Black, Color.Black };
         public static int[] PieceValue = { 0, 100, 325, 325, 550, 1000, 50000, 100, 325, 325, 550, 1000, 50000 };
@@ -29,12 +26,12 @@ namespace Assets.Project.ChessEngine
         public static bool[] PieceMin = { false, false, true, true, false, false, false, false, true, true, false, false, false };
         public static string PieceLabels = "-PNBRQKpnbrqkX";
 
-        public static Color GetColor(this SquareContent sq) { return PieceColor[(int)sq]; }
-        public static int GetValue(this SquareContent sq) { return PieceValue[(int)sq]; }
-        public static bool IsBig(this SquareContent sq) { return PieceBig[(int)sq]; }
-        public static bool IsMajor(this SquareContent sq) { return PieceMaj[(int)sq]; }
-        public static bool IsMinor(this SquareContent sq) { return PieceMin[(int)sq]; }
-        public static string GetLabel(this SquareContent sq) { return PieceLabels[(int)sq].ToString(); }
+        public static Color GetColor(this PieceType pt) { return PieceColor[(int)pt]; }
+        public static int GetValue(this PieceType pt) { return PieceValue[(int)pt]; }
+        public static bool IsBig(this PieceType pt) { return PieceBig[(int)pt]; }
+        public static bool IsMajor(this PieceType pt) { return PieceMaj[(int)pt]; }
+        public static bool IsMinor(this PieceType pt) { return PieceMin[(int)pt]; }
+        public static string GetLabel(this PieceType pt) { return PieceLabels[(int)pt].ToString(); }
     }
 
     public static class FileMethods
@@ -69,11 +66,11 @@ namespace Assets.Project.ChessEngine
         }
     }
 
-    public static class SideMethods
+    public static class ColorMethods
     {
-        public static string SideLabels = "wb-";
+        public static string ColorLabels = "wb-";
 
-        public static string GetLabel(this Side s) { return SideLabels[(int)s].ToString(); }
+        public static string GetLabel(this Color s) { return ColorLabels[(int)s].ToString(); }
     }
 
     public static class StringExtensions
