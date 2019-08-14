@@ -33,7 +33,7 @@ namespace Assets.Project.ChessEngine
             get { return Value & fromSqMask; }
             set
             {
-                if (value < 0 || value > 63) throw new IllegalArgumentException("Invalid argument provided for FromSq property. Expected [0-63].");
+                if (value < 0 || value > 127) throw new IllegalArgumentException("Invalid argument provided for FromSq property. Expected [0-127].");
                 Value |= value;
             }
         }
@@ -43,7 +43,7 @@ namespace Assets.Project.ChessEngine
             get { return (Value >> 7) & toSqMask; }
             set
             {
-                if (value < 0 || value > 63) throw new IllegalArgumentException("Invalid argument provided for ToSq property. Expected [0-63].");
+                if (value < 0 || value > 127) throw new IllegalArgumentException("Invalid argument provided for ToSq property. Expected [0-127].");
                 Value |= (value << 7);
             }
         }
@@ -114,6 +114,20 @@ namespace Assets.Project.ChessEngine
                     Value &= ~(1 << isCastleMask);
                 }
             }
+        }
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            string fromSq = ((Square)FromSq).GetLabel();
+            string toSq = ((Square)ToSq).GetLabel();
+            string promotedPiece = "";
+            if (PromotedPiece != 0)
+            {
+                promotedPiece = ((PieceType)PromotedPiece).GetLabel().ToLower();
+            }
+            sb.Append(fromSq + toSq + promotedPiece);
+            return sb.ToString();
         }
     }
 }
