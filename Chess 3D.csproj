@@ -224,6 +224,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Project\ChessEngine\Exceptions\IllegalArgumentException.cs" />
+    <Compile Include="Assets\Project\ChessEngine\Move.cs" />
     <Compile Include="Assets\Project\ChessEngine\Bitboard.cs" />
     <Compile Include="Assets\Project\ChessEngine\Board.cs" />
     <Compile Include="Assets\Project\ChessEngine\Definitions.cs" />
@@ -243,6 +245,7 @@
     <Compile Include="Assets\Project\Scripts\Spawner.cs" />
     <Compile Include="Assets\Project\Scripts\Visualizer.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />
 </Project>

@@ -25,7 +25,7 @@ namespace Assets.Project.ChessEngine
         {
             ulong val = this.Value;
             int count = 0;
-            while(val > 0) { count++; val &= val - 1; }
+            while (val > 0) { count++; val &= val - 1; }
             return count;
         }
         public bool IsSet(int position)
@@ -37,7 +37,7 @@ namespace Assets.Project.ChessEngine
         {
             StringBuilder sb = new StringBuilder(Environment.NewLine + "Bitboard: " + Environment.NewLine + Environment.NewLine);
             ulong mask = 1;
-            
+
             int sq120 = 0;
             int sq64 = 0;
 
@@ -71,6 +71,6 @@ namespace Assets.Project.ChessEngine
                 SetMask[i] |= ((ulong)1 << i);
                 ClearMask[i] = ~SetMask[i];
             }
-    }
+        }
     }
 }
