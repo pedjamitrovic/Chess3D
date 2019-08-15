@@ -24,9 +24,9 @@ namespace Assets.Project.ChessEngine
         private static readonly int isPawnStartMask = 0x80000;
         private static readonly int promotedPieceMask = 0xF;
         private static readonly int isCastleMask = 0x1000000;
-
+        
         public int Value { get; private set; } = 0;
-        public int Score { get; private set; } = 0;
+        public int Score { get; set; } = 0;
 
         public int FromSq
         {
@@ -75,11 +75,11 @@ namespace Assets.Project.ChessEngine
             {
                 if (value)
                 {
-                    Value |= (1 << isEnPassantMask);
+                    Value |= isEnPassantMask;
                 }
                 else
                 {
-                    Value &= ~(1 << isEnPassantMask);
+                    Value &= ~(1 << 19);
                 }
             }
         }
@@ -91,11 +91,11 @@ namespace Assets.Project.ChessEngine
             {
                 if (value)
                 {
-                    Value |= (1 << isPawnStartMask);
+                    Value |= isPawnStartMask;
                 }
                 else
                 {
-                    Value &= ~(1 << isPawnStartMask);
+                    Value &= ~(1 << 20);
                 }
             }
         }
@@ -107,13 +107,39 @@ namespace Assets.Project.ChessEngine
             {
                 if (value)
                 {
-                    Value |= (1 << isCastleMask);
+                    Value |= isCastleMask;
                 }
                 else
                 {
-                    Value &= ~(1 << isCastleMask);
+                    Value &= ~(1 << 25);
                 }
             }
+        }
+
+        public Move()
+        {
+
+        }
+
+        public Move(Square fromSq, Square toSq)
+        {
+            FromSq = (int)fromSq;
+            ToSq = (int)toSq;
+        }
+
+        public Move(Square fromSq, Square toSq, PieceType capturedPiece)
+        {
+            FromSq = (int)fromSq;
+            ToSq = (int)toSq;
+            CapturedPiece = (int)capturedPiece;
+        }
+
+        public Move(Square fromSq, Square toSq, PieceType capturedPiece, PieceType promotedPiece)
+        {
+            FromSq = (int)fromSq;
+            ToSq = (int)toSq;
+            CapturedPiece = (int)capturedPiece;
+            PromotedPiece = (int)promotedPiece;
         }
 
         public override string ToString()

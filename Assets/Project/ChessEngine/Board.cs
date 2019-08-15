@@ -395,5 +395,10 @@ namespace Assets.Project.ChessEngine
         {
             return SqIndexes120To64[sq120];
         }
+        
+        public static Rank GetRank(Square square)
+        {
+            return (Rank)RankBoard[(int)square];
+        }
     }
 }
