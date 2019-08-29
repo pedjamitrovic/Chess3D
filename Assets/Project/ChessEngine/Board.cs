@@ -9,6 +9,7 @@ namespace Assets.Project.ChessEngine
 {
     public class Board
     {
+        #region PublicFields
         public Piece[] Pieces { get; set; }
         public Bitboard[] Pawns { get; set; }
         public Square[] Kings { get; set; }
@@ -27,7 +28,9 @@ namespace Assets.Project.ChessEngine
         public int HistoryPly { get; set; } // number of halfmoves in the game so far
         public int Ply { get; set; } // number of halfmoves in the move search so far
         public ulong StateKey { get; set; } // board state hash key
-
+        #endregion
+        #region PublicMethods
+        /* Default ctor. */
         public Board()
         {
             Pieces = new Piece[BoardSquaresNumber];
@@ -58,7 +61,97 @@ namespace Assets.Project.ChessEngine
 
             StateKey = 0;
         }
+        /* Parses FEN string in order and inits Board with parsed values. */
+        public Board(string fen) : this()
+        {
+            int count;
+            File file = File.FileA;
+            Rank rank = Rank.Rank8;
+            int i = 0;
+            PieceType pieceType;
 
+            for (; rank >= Rank.Rank1; ++i)
+            {
+                count = 1;
+                switch (fen[i])
+                {
+                    case 'p': pieceType = PieceType.BlackPawn; break;
+                    case 'n': pieceType = PieceType.BlackKnight; break;
+                    case 'b': pieceType = PieceType.BlackBishop; break;
+                    case 'r': pieceType = PieceType.BlackRook; break;
+                    case 'k': pieceType = PieceType.BlackKing; break;
+                    case 'q': pieceType = PieceType.BlackQueen; break;
+                    case 'P': pieceType = PieceType.WhitePawn; break;
+                    case 'N': pieceType = PieceType.WhiteKnight; break;
+                    case 'B': pieceType = PieceType.WhiteBishop; break;
+                    case 'R': pieceType = PieceType.WhiteRook; break;
+                    case 'K': pieceType = PieceType.WhiteKing; break;
+                    case 'Q': pieceType = PieceType.WhiteQueen; break;
+
+                    case '1':
+                    case '2':
+                    case '3':
+                    case '4':
+                    case '5':
+                    case '6':
+                    case '7':
+                    case '8':
+                        pieceType = PieceType.None;
+                        count = fen[i] - '0';
+                        break;
+
+                    case '/':
+                    case ' ':
+                        rank--;
+                        file = File.FileA;
+                        continue;
+
+                    default:
+                        throw new FENFormatException("FEN parsing error");
+                }
+
+                int sq64, sq120;
+                for (int j = 0; j < count; ++j)
+                {
+                    sq64 = (int)rank * 8 + (int)file;
+                    sq120 = Sq120(sq64);
+                    if (pieceType != PieceType.None)
+                    {
+                        Pieces[sq120] = Piece.CreatePiece(pieceType, (Square)sq120);
+                    }
+                    file++;
+                }
+            }
+
+            OnTurn = (fen[i] == 'w') ? Color.White : Color.Black;
+            i += 2;
+
+            for (int j = 0; fen[i] != ' ' && j < 4; ++j, ++i)
+            {
+                switch (fen[i])
+                {
+                    case 'k': CastlePerm |= (int)CastlingPermit.BlackKingCastling; break;
+                    case 'q': CastlePerm |= (int)CastlingPermit.BlackQueenCastling; break;
+                    case 'K': CastlePerm |= (int)CastlingPermit.WhiteKingCastling; break;
+                    case 'Q': CastlePerm |= (int)CastlingPermit.WhiteQueenCastling; break;
+                    default: break;
+                }
+            }
+            i++;
+
+            if (fen[i] != '-')
+            {
+                file = (File)(fen[i] - 'a');
+                rank = (Rank)(fen[i + 1] - '1');
+
+                EnPassant = (Square)ConvertToSq120(file, rank);
+            }
+
+            StateKey = CalculateStateKey();
+
+            UpdateListsAndMaterial();
+        }
+        /* Updates tracked data of importance based on current board pieces. It should be called after any board state change is made. */
         public void UpdateListsAndMaterial()
         {
             for (int i = 0; i < BoardSquaresNumber; ++i)
@@ -84,7 +177,7 @@ namespace Assets.Project.ChessEngine
                 }
             }
         }
-
+        /* Checks if tracked data of importance is valid based on current board pieces. It's used for integrity testing. */
         public void CheckIntegrity()
         {
             int[] TempPieceCount = new int[PieceTypesCount];
@@ -175,9 +268,9 @@ namespace Assets.Project.ChessEngine
                 throw new BoardIntegrityException("Player on turn can be either white or black, found " + (int)OnTurn);
             }
 
-            if (HashGenerator.CalculateStateKey(this) != StateKey)
+            if (CalculateStateKey() != StateKey)
             {
-                throw new BoardIntegrityException("Expected state key " + HashGenerator.CalculateStateKey(this) + ", found " + StateKey);
+                throw new BoardIntegrityException("Expected state key " + CalculateStateKey() + ", found " + StateKey);
             }
 
             if (EnPassant != Square.None &&
@@ -193,12 +286,7 @@ namespace Assets.Project.ChessEngine
                 throw new BoardIntegrityException("King position inconsistency");
             }
         }
-
-        public static readonly int[] KnDirection = { -8, -19, -21, -12, 8, 19, 21, 12 };
-        public static readonly int[] RkDirection = { -1, -10, 1, 10 };
-        public static readonly int[] BiDirection = { -9, -11, 11, 9 };
-        public static readonly int[] KiDirection = { -1, -10, 1, 10, -9, -11, 11, 9 };
-        
+        /* Checks if provided square is attacked by provided side. */
         public bool IsSquareAttacked(int sq, Color side)
         {
             CheckIntegrity(); // TODO: remove CheckIntegrity for perfomance boost
@@ -283,7 +371,7 @@ namespace Assets.Project.ChessEngine
 
             return false;
         }
-
+        /* Returns string in human readable format. */
         public override string ToString()
         {
             int square;
@@ -319,7 +407,324 @@ namespace Assets.Project.ChessEngine
             sb.Append("StateKey: " + StateKey.ToString("X") + Environment.NewLine);
             return sb.ToString();
         }
+        #region HashGenerator
+        private static ulong[,] pieceKeys; // 13x120
+        private static ulong sideKey;
+        private static ulong[] castleKeys; // 16 (4 bit representation 0-15 values)
+        private static Random rnd = new Random();
+        
+        public ulong CalculateStateKey()
+        {
+            ulong finalKey = 0;
+            Piece piece;
 
+            for (int sq = 0; sq < BoardSquaresNumber; ++sq)
+            {
+                piece = Pieces[sq];
+                if (piece != null && !(piece is OffLimits))
+                {
+                    finalKey ^= pieceKeys[(int)piece.GetPieceType(), sq];
+                }
+            }
+
+            if (OnTurn == Color.White) finalKey ^= sideKey;
+
+            if (EnPassant != Square.None) finalKey ^= pieceKeys[0, (byte)EnPassant];
+
+            finalKey ^= castleKeys[CastlePerm];
+
+            return finalKey;
+        }
+
+        private static ulong Get64BitRandom(ulong minValue = ulong.MinValue, ulong maxValue = ulong.MaxValue)
+        {
+            byte[] buf = new byte[8];
+            rnd.NextBytes(buf);
+            ulong longRand = BitConverter.ToUInt64(buf, 0);
+            return longRand % (maxValue - minValue) + minValue;
+        }
+        #endregion
+        #region MoveGenerator
+        private static readonly PieceType[] LoopSlidePieces =
+        {
+            PieceType.WhiteBishop, PieceType.WhiteRook, PieceType.WhiteQueen, PieceType.None,
+            PieceType.BlackBishop, PieceType.BlackRook, PieceType.BlackQueen, PieceType.None
+        };
+
+        private static readonly PieceType[] LoopNonSlidePieces =
+        {
+            PieceType.WhiteKnight, PieceType.WhiteKing, PieceType.None,
+            PieceType.BlackKnight, PieceType.BlackKing, PieceType.None
+        };
+
+        private static readonly int[] StartLoopSlideIndex = { 0, 4 };
+        private static readonly int[] StartLoopNonSlideIndex = { 0, 3 };
+
+        private static readonly int[,] PieceDirection = {
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            { -8, -19,  -21, -12, 8, 19, 21, 12, 0 },
+            { -9, -11, 11, 9, 0, 0, 0, 0, 0 },
+            { -1, -10,  1, 10, 0, 0, 0, 0, 0 },
+            { -1, -10,  1, 10, -9, -11, 11, 9, 0 },
+            { -1, -10,  1, 10, -9, -11, 11, 9, 0 },
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            { -8, -19,  -21, -12, 8, 19, 21, 12, 0 },
+            { -9, -11, 11, 9, 0, 0, 0, 0, 0 },
+            { -1, -10,  1, 10, 0, 0, 0, 0, 0 },
+            { -1, -10,  1, 10, -9, -11, 11, 9, 0 },
+            { -1, -10,  1, 10, -9, -11, 11, 9, 0 }
+        };
+
+        public MoveList GenerateAllMoves()
+        {
+            CheckIntegrity(); // TODO: remove CheckIntegrity for perfomance boost
+
+            MoveList moveList = new MoveList();
+            Move move;
+
+            if (OnTurn == Color.White)
+            {
+                for (int i = 0; i < PieceCount[(int)PieceType.WhitePawn]; ++i)
+                {
+                    Square square = PieceList[(int)PieceType.WhitePawn, i];
+
+                    if (Pieces[(int)square + 10] == null)
+                    {
+                        moveList.AddPawnQuietMove(OnTurn, square, square + 10);
+                        if (Board.GetRank(square) == Rank.Rank2 && Pieces[(int)square + 20] == null)
+                        {
+                            move = new Move(square, square + 20)
+                            {
+                                IsPawnStart = true
+                            };
+                            moveList.AddQuietMove(move);
+                        }
+                    }
+
+                    if (Pieces[(int)square + 9]?.Color == Color.Black)
+                    {
+                        moveList.AddPawnCaptureMove(OnTurn, square, square + 9, Pieces[(int)square + 9].GetPieceType());
+                    }
+                    if (Pieces[(int)square + 11]?.Color == Color.Black)
+                    {
+                        moveList.AddPawnCaptureMove(OnTurn, square, square + 11, Pieces[(int)square + 11].GetPieceType());
+                    }
+
+                    if (EnPassant != Square.None)
+                    {
+                        if (square + 9 == EnPassant)
+                        {
+                            move = new Move(square, square + 9)
+                            {
+                                IsEnPassant = true
+                            };
+                            moveList.AddEnPassantMove(move);
+                        }
+                        if (square + 11 == EnPassant)
+                        {
+                            move = new Move(square, square + 11)
+                            {
+                                IsEnPassant = true
+                            };
+                            moveList.AddEnPassantMove(move);
+                        }
+                    }
+                }
+
+                if ((CastlePerm & (int)CastlingPermit.WhiteKingCastling) > 0)
+                {
+                    if (Pieces[(int)Square.F1] == null && Pieces[(int)Square.G1] == null)
+                    {
+                        if (!IsSquareAttacked((int)Square.E1, Color.Black) && !IsSquareAttacked((int)Square.F1, Color.Black))
+                        {
+                            move = new Move(Square.E1, Square.G1)
+                            {
+                                IsCastle = true
+                            };
+                            moveList.AddQuietMove(move);
+                        }
+                    }
+                }
+
+                if ((CastlePerm & (int)CastlingPermit.WhiteQueenCastling) > 0)
+                {
+                    if (Pieces[(int)Square.D1] == null && Pieces[(int)Square.C1] == null && Pieces[(int)Square.B1] == null)
+                    {
+                        if (!IsSquareAttacked((int)Square.E1, Color.Black) && !IsSquareAttacked((int)Square.D1, Color.Black))
+                        {
+                            move = new Move(Square.E1, Square.C1)
+                            {
+                                IsCastle = true
+                            };
+                            moveList.AddQuietMove(move);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 0; i < PieceCount[(int)PieceType.BlackPawn]; ++i)
+                {
+                    Square square = PieceList[(int)PieceType.BlackPawn, i];
+
+                    if (Pieces[(int)square - 10] == null)
+                    {
+                        moveList.AddPawnQuietMove(OnTurn, square, square - 10);
+                        if (Board.GetRank(square) == Rank.Rank7 && Pieces[(int)square - 20] == null)
+                        {
+                            move = new Move(square, square - 20)
+                            {
+                                IsPawnStart = true
+                            };
+                            moveList.AddQuietMove(move);
+                        }
+                    }
+
+                    if (Pieces[(int)square - 9]?.Color == Color.White)
+                    {
+                        moveList.AddPawnCaptureMove(OnTurn, square, square - 9, Pieces[(int)square - 9].GetPieceType());
+                    }
+                    if (Pieces[(int)square - 11]?.Color == Color.White)
+                    {
+                        moveList.AddPawnCaptureMove(OnTurn, square, square - 11, Pieces[(int)square - 11].GetPieceType());
+                    }
+
+                    if (EnPassant != Square.None)
+                    {
+                        if (square - 9 == EnPassant)
+                        {
+                            move = new Move(square, square - 9)
+                            {
+                                IsEnPassant = true
+                            };
+                            moveList.AddEnPassantMove(move);
+                        }
+                        if (square - 11 == EnPassant)
+                        {
+                            move = new Move(square, square - 11)
+                            {
+                                IsEnPassant = true
+                            };
+                            moveList.AddEnPassantMove(move);
+                        }
+                    }
+                }
+
+                if ((CastlePerm & (int)CastlingPermit.BlackKingCastling) > 0)
+                {
+                    if (Pieces[(int)Square.F8] == null && Pieces[(int)Square.G8] == null)
+                    {
+                        if (!IsSquareAttacked((int)Square.E8, Color.White) && !IsSquareAttacked((int)Square.F8, Color.White))
+                        {
+                            move = new Move(Square.E8, Square.G8)
+                            {
+                                IsCastle = true
+                            };
+                            moveList.AddQuietMove(move);
+                        }
+                    }
+                }
+
+                if ((CastlePerm & (int)CastlingPermit.BlackQueenCastling) > 0)
+                {
+                    if (Pieces[(int)Square.D8] == null && Pieces[(int)Square.C8] == null && Pieces[(int)Square.B8] == null)
+                    {
+                        if (!IsSquareAttacked((int)Square.E8, Color.White) && !IsSquareAttacked((int)Square.D8, Color.White))
+                        {
+                            move = new Move(Square.E8, Square.C8)
+                            {
+                                IsCastle = true
+                            };
+                            moveList.AddQuietMove(move);
+                        }
+                    }
+                }
+            }
+
+            int pieceIndex = StartLoopSlideIndex[(int)OnTurn];
+            PieceType pieceType = LoopSlidePieces[pieceIndex++];
+            while (pieceType != PieceType.None)
+            {
+                for (int i = 0; i < PieceCount[(int)pieceType]; ++i)
+                {
+                    Square square = PieceList[(int)pieceType, i];
+
+                    int index = 0;
+                    int direction = PieceDirection[(int)pieceType, index++];
+                    while (direction != 0)
+                    {
+                        Square tempSq = square + direction;
+                        Piece piece = Pieces[(int)tempSq];
+
+                        while (!(piece is OffLimits))
+                        {
+                            if (piece != null)
+                            {
+                                if (piece.Color == (Color)((int)OnTurn ^ 1)) // xor operation gives opposite side as result
+                                {
+                                    move = new Move(square, tempSq, piece.GetPieceType());
+                                    moveList.AddCaptureMove(move);
+                                }
+                                break;
+                            }
+                            move = new Move(square, tempSq);
+                            moveList.AddQuietMove(move);
+                            tempSq += direction;
+                            piece = Pieces[(int)tempSq];
+                        }
+                        direction = PieceDirection[(int)pieceType, index++];
+                    }
+                }
+                pieceType = LoopSlidePieces[pieceIndex++];
+            }
+
+            /* Loop for non slide */
+            pieceIndex = StartLoopNonSlideIndex[(int)OnTurn];
+            pieceType = LoopNonSlidePieces[pieceIndex++];
+
+            while (pieceType != PieceType.None)
+            {
+                for (int i = 0; i < PieceCount[(int)pieceType]; ++i)
+                {
+                    Square square = PieceList[(int)pieceType, i];
+
+                    int index = 0;
+                    int direction = PieceDirection[(int)pieceType, index++];
+                    while (direction != 0)
+                    {
+                        Square tempSq = square + direction;
+                        Piece piece = Pieces[(int)tempSq];
+
+                        if (piece is OffLimits)
+                        {
+                            direction = PieceDirection[(int)pieceType, index++];
+                            continue;
+                        }
+
+                        if (piece != null)
+                        {
+                            if (piece.Color == (Color)((int)OnTurn ^ 1)) // xor operation gives opposite side as result
+                            {
+                                move = new Move(square, tempSq, piece.GetPieceType());
+                                moveList.AddCaptureMove(move);
+                            }
+                            direction = PieceDirection[(int)pieceType, index++];
+                            continue;
+                        }
+                        move = new Move(square, tempSq);
+                        moveList.AddQuietMove(move);
+                        direction = PieceDirection[(int)pieceType, index++];
+                    }
+                }
+                pieceType = LoopNonSlidePieces[pieceIndex++];
+            }
+
+            return moveList;
+        }
+        #endregion
+        #endregion
+        #region StaticFields
         public static readonly int BoardSquaresNumber = 120; // 120 square board representation style
         public static readonly int PawnsRepresentationNumber = 3; // keeping track of white, black and both pawn positions in 64bit array
         public static readonly int KingsRepresentationNumber = 2; // keeping track of both white and black king position
@@ -328,12 +733,18 @@ namespace Assets.Project.ChessEngine
         public static readonly int MajorPiecesRepresentationNumber = 3; // keeping track of both white and black queens and rooks count
         public static readonly int MinorPiecesRepresentationNumber = 3; // keeping track of both white and black knights and bishops count
         public static readonly int MaxCountOfPieceType = 10; // 8 pawns can upgrade to same figure, plus max 2 same figures on board
-
+        
         private static readonly int[] SqIndexes120To64;
         private static readonly int[] SqIndexes64To120;
         private static readonly int[] FileBoard;
         private static readonly int[] RankBoard;
 
+        public static readonly int[] KnDirection = { -8, -19, -21, -12, 8, 19, 21, 12 };
+        public static readonly int[] RkDirection = { -1, -10, 1, 10 };
+        public static readonly int[] BiDirection = { -9, -11, 11, 9 };
+        public static readonly int[] KiDirection = { -1, -10, 1, 10, -9, -11, 11, 9 };
+        #endregion
+        #region StaticMethods
         static Board()
         {
             SqIndexes120To64 = new int[120];
@@ -343,6 +754,7 @@ namespace Assets.Project.ChessEngine
             FileBoard = new int[BoardSquaresNumber];
             RankBoard = new int[BoardSquaresNumber];
             InitFileRankBoards();
+            InitHashGenerator();
         }
 
         private static void InitSqIndexes()
@@ -381,6 +793,24 @@ namespace Assets.Project.ChessEngine
             }
         }
 
+        private static void InitHashGenerator()
+        {
+            pieceKeys = new ulong[PieceTypesCount, BoardSquaresNumber];
+            castleKeys = new ulong[16];
+            for (int i = 0; i < PieceTypesCount; ++i)
+            {
+                for (int j = 0; j < 120; ++j)
+                {
+                    pieceKeys[i, j] = Get64BitRandom();
+                }
+            }
+            sideKey = Get64BitRandom();
+            for (int i = 0; i < 16; ++i)
+            {
+                castleKeys[i] = Get64BitRandom();
+            }
+        }
+
         public static int ConvertToSq120(File f, Rank r)
         {
             return ((int)r * 10 + (int)f + 21);
@@ -400,5 +830,6 @@ namespace Assets.Project.ChessEngine
         {
             return (Rank)RankBoard[(int)square];
         }
+        #endregion
     }
 }

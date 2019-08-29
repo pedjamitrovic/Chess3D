@@ -231,9 +231,6 @@
     <Compile Include="Assets\Project\ChessEngine\Definitions.cs" />
     <Compile Include="Assets\Project\ChessEngine\Exceptions\BoardIntegrityException.cs" />
     <Compile Include="Assets\Project\ChessEngine\Exceptions\FENFormatException.cs" />
-    <Compile Include="Assets\Project\ChessEngine\FENParser.cs" />
-    <Compile Include="Assets\Project\ChessEngine\HashGenerator.cs" />
-    <Compile Include="Assets\Project\ChessEngine\MoveGenerator.cs" />
     <Compile Include="Assets\Project\ChessEngine\MoveList.cs" />
     <Compile Include="Assets\Project\ChessEngine\Pieces\OffBoard.cs" />
     <Compile Include="Assets\Project\Scripts\GameController.cs" />
