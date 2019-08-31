@@ -233,6 +233,7 @@
     <Compile Include="Assets\Project\ChessEngine\Exceptions\FENFormatException.cs" />
     <Compile Include="Assets\Project\ChessEngine\MoveList.cs" />
     <Compile Include="Assets\Project\ChessEngine\Pieces\OffBoard.cs" />
+    <Compile Include="Assets\Project\ChessEngine\UndoMove.cs" />
     <Compile Include="Assets\Project\Scripts\GameController.cs" />
     <Compile Include="Assets\Project\ChessEngine\Pieces\Bishop.cs" />
     <Compile Include="Assets\Project\ChessEngine\Pieces\King.cs" />

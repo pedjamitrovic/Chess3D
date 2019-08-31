@@ -31,6 +31,8 @@
         public static bool IsBig(this PieceType pt) { return PieceBig[(int)pt]; }
         public static bool IsMajor(this PieceType pt) { return PieceMaj[(int)pt]; }
         public static bool IsMinor(this PieceType pt) { return PieceMin[(int)pt]; }
+        public static bool IsPawn(this PieceType pt) { return (pt == PieceType.BlackPawn || pt == PieceType.WhitePawn); }
+        public static bool IsKing(this PieceType pt) { return (pt == PieceType.BlackKing || pt == PieceType.WhiteKing); }
         public static string GetLabel(this PieceType pt) { return PieceLabels[(int)pt].ToString(); }
     }
 

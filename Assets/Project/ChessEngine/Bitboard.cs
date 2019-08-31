@@ -9,21 +9,21 @@ namespace Assets.Project.ChessEngine
     {
         public ulong Value { get; set; }
 
-        public Bitboard() { this.Value = 0; }
-        public Bitboard(ulong value) { this.Value = value; }
-        public void SetBit(int position)
+        public Bitboard() { Value = 0; }
+        public Bitboard(ulong value) { Value = value; }
+        public void SetBit(Square position)
         {
-            if (position < 0 || position > 63) throw new IndexOutOfRangeException("Bitboard has indexes of range [0..63], provided: " + position);
-            this.Value |= SetMask[position];
+            if ((int)position < 0 || (int)position > 63) throw new IndexOutOfRangeException("Bitboard has indexes of range [0..63], provided: " + position);
+            Value |= SetMask[(int)position];
         }
-        public void ClearBit(int position)
+        public void ClearBit(Square position)
         {
-            if (position < 0 || position > 63) throw new IndexOutOfRangeException("Bitboard has indexes of range [0..63], provided: " + position);
-            this.Value &= ClearMask[position];
+            if ((int)position < 0 || (int)position > 63) throw new IndexOutOfRangeException("Bitboard has indexes of range [0..63], provided: " + position);
+            Value &= ClearMask[(int)position];
         }
         public int CountBit()
         {
-            ulong val = this.Value;
+            ulong val = Value;
             int count = 0;
             while (val > 0) { count++; val &= val - 1; }
             return count;
@@ -31,7 +31,7 @@ namespace Assets.Project.ChessEngine
         public bool IsSet(int position)
         {
             if (position < 0 || position > 63) throw new IndexOutOfRangeException("Bitboard has indexes of range [0..63], provided: " + position);
-            return (this.Value & SetMask[position]) > 0;
+            return (Value & SetMask[position]) > 0;
         }
         public override string ToString()
         {

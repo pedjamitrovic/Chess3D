@@ -28,43 +28,43 @@ namespace Assets.Project.ChessEngine
         public int Value { get; private set; } = 0;
         public int Score { get; set; } = 0;
 
-        public int FromSq
+        public Square FromSq
         {
-            get { return Value & fromSqMask; }
+            get { return (Square)(Value & fromSqMask); }
             set
             {
-                if (value < 0 || value > 127) throw new IllegalArgumentException("Invalid argument provided for FromSq property. Expected [0-127].");
-                Value |= value;
+                if ((int)value < 0 || (int)value > 127) throw new IllegalArgumentException("Invalid argument provided for FromSq property. Expected [0-127].");
+                Value |= (int)value;
             }
         }
 
-        public int ToSq
+        public Square ToSq
         {
-            get { return (Value >> 7) & toSqMask; }
+            get { return (Square)((Value >> 7) & toSqMask); }
             set
             {
-                if (value < 0 || value > 127) throw new IllegalArgumentException("Invalid argument provided for ToSq property. Expected [0-127].");
-                Value |= (value << 7);
+                if ((int)value < 0 || (int)value > 127) throw new IllegalArgumentException("Invalid argument provided for ToSq property. Expected [0-127].");
+                Value |= ((int)value << 7);
             }
         }
 
-        public int CapturedPiece
+        public PieceType CapturedPiece
         {
-            get { return (Value >> 14) & capturedPieceMask; }
+            get { return (PieceType)((Value >> 14) & capturedPieceMask); }
             set
             {
-                if (value < 0 || value > 15) throw new IllegalArgumentException("Invalid argument provided for CapturedPiece property. Expected [0-15].");
-                Value |= (value << 14);
+                if ((int)value < 0 || (int)value > 15) throw new IllegalArgumentException("Invalid argument provided for CapturedPiece property. Expected [0-15].");
+                Value |= ((int)value << 14);
             }
         }
 
-        public int PromotedPiece
+        public PieceType PromotedPiece
         {
-            get { return (Value >> 20) & promotedPieceMask; }
+            get { return (PieceType)((Value >> 20) & promotedPieceMask); }
             set
             {
-                if (value < 0 || value > 15) throw new IllegalArgumentException("Invalid argument provided for PromotedPiece property. Expected [0-15].");
-                Value |= (value << 20);
+                if ((int)value < 0 || (int)value > 15) throw new IllegalArgumentException("Invalid argument provided for PromotedPiece property. Expected [0-15].");
+                Value |= ((int)value << 20);
             }
         }
 
@@ -123,34 +123,34 @@ namespace Assets.Project.ChessEngine
 
         public Move(Square fromSq, Square toSq)
         {
-            FromSq = (int)fromSq;
-            ToSq = (int)toSq;
+            FromSq = fromSq;
+            ToSq = toSq;
         }
 
         public Move(Square fromSq, Square toSq, PieceType capturedPiece)
         {
-            FromSq = (int)fromSq;
-            ToSq = (int)toSq;
-            CapturedPiece = (int)capturedPiece;
+            FromSq = fromSq;
+            ToSq = toSq;
+            CapturedPiece = capturedPiece;
         }
 
         public Move(Square fromSq, Square toSq, PieceType capturedPiece, PieceType promotedPiece)
         {
-            FromSq = (int)fromSq;
-            ToSq = (int)toSq;
-            CapturedPiece = (int)capturedPiece;
-            PromotedPiece = (int)promotedPiece;
+            FromSq = fromSq;
+            ToSq = toSq;
+            CapturedPiece = capturedPiece;
+            PromotedPiece = promotedPiece;
         }
 
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            string fromSq = ((Square)FromSq).GetLabel();
-            string toSq = ((Square)ToSq).GetLabel();
+            string fromSq = FromSq.GetLabel();
+            string toSq = ToSq.GetLabel();
             string promotedPiece = "";
             if (PromotedPiece != 0)
             {
-                promotedPiece = ((PieceType)PromotedPiece).GetLabel().ToLower();
+                promotedPiece = PromotedPiece.GetLabel().ToLower();
             }
             sb.Append(fromSq + toSq + promotedPiece);
             return sb.ToString();
