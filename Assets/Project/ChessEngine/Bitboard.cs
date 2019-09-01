@@ -13,13 +13,15 @@ namespace Assets.Project.ChessEngine
         public Bitboard(ulong value) { Value = value; }
         public void SetBit(Square position)
         {
-            if ((int)position < 0 || (int)position > 63) throw new IndexOutOfRangeException("Bitboard has indexes of range [0..63], provided: " + position);
-            Value |= SetMask[(int)position];
+            int sq64 = Board.Sq64((int)position);
+            if (sq64 < 0 || sq64 > 63) throw new IndexOutOfRangeException("Bitboard has indexes of range [0..63], provided: " + sq64);
+            Value |= SetMask[sq64];
         }
         public void ClearBit(Square position)
         {
-            if ((int)position < 0 || (int)position > 63) throw new IndexOutOfRangeException("Bitboard has indexes of range [0..63], provided: " + position);
-            Value &= ClearMask[(int)position];
+            int sq64 = Board.Sq64((int)position);
+            if (sq64 < 0 || sq64 > 63) throw new IndexOutOfRangeException("Bitboard has indexes of range [0..63], provided: " + sq64);
+            Value &= ClearMask[sq64];
         }
         public int CountBit()
         {

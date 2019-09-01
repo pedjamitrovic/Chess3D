@@ -171,8 +171,8 @@ namespace Assets.Project.ChessEngine
                     if (piece is King) Kings[(int)piece.Color] = (Square)i;
                     else if (piece is Pawn)
                     {
-                        Pawns[(int)piece.Color].SetBit((Square)Sq64(i));
-                        Pawns[(int)Color.Both].SetBit((Square)Sq64(i));
+                        Pawns[(int)piece.Color].SetBit((Square)i);
+                        Pawns[(int)Color.Both].SetBit((Square)i);
                     }
 
                     Material[(int)piece.Color] += piece.Value;
@@ -961,7 +961,7 @@ namespace Assets.Project.ChessEngine
             Pieces[(int)from] = null;
 
             HashPiece(piece, to);
-            Pieces[(int)from] = piece;
+            Pieces[(int)to] = piece;
 
             if (!piece.IsBig())
             {
@@ -1082,7 +1082,7 @@ namespace Assets.Project.ChessEngine
             OnTurn = (Color)((int)OnTurn ^ 1);
             HashSide();
 
-            if (IsSquareAttacked(Kings[(int)OnTurn], OnTurn))
+            if (IsSquareAttacked(Kings[(int)OnTurn ^ 1], OnTurn))
             {
                 UndoMove();
                 return false;
