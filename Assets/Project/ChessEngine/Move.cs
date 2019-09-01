@@ -116,32 +116,6 @@ namespace Assets.Project.ChessEngine
             }
         }
 
-        public Move()
-        {
-
-        }
-
-        public Move(Square fromSq, Square toSq)
-        {
-            FromSq = fromSq;
-            ToSq = toSq;
-        }
-
-        public Move(Square fromSq, Square toSq, PieceType capturedPiece)
-        {
-            FromSq = fromSq;
-            ToSq = toSq;
-            CapturedPiece = capturedPiece;
-        }
-
-        public Move(Square fromSq, Square toSq, PieceType capturedPiece, PieceType promotedPiece)
-        {
-            FromSq = fromSq;
-            ToSq = toSq;
-            CapturedPiece = capturedPiece;
-            PromotedPiece = promotedPiece;
-        }
-
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();

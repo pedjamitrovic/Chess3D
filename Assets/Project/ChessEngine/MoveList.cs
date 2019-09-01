@@ -28,28 +28,86 @@ namespace Assets.Project.ChessEngine
             {
                 if (Board.GetRank(fromSq) == Rank.Rank7)
                 {
-                    AddCaptureMove(new Move(fromSq, toSq, capturedPiece, PieceType.WhiteQueen));
-                    AddCaptureMove(new Move(fromSq, toSq, capturedPiece, PieceType.WhiteRook));
-                    AddCaptureMove(new Move(fromSq, toSq, capturedPiece, PieceType.WhiteBishop));
-                    AddCaptureMove(new Move(fromSq, toSq, capturedPiece, PieceType.WhiteKnight));
+                    AddCaptureMove(new Move
+                    {
+                        FromSq = fromSq,
+                        ToSq = toSq,
+                        CapturedPiece = capturedPiece,
+                        PromotedPiece = PieceType.WhiteQueen
+                    });
+                    AddCaptureMove(new Move
+                    {
+                        FromSq = fromSq,
+                        ToSq = toSq,
+                        CapturedPiece = capturedPiece,
+                        PromotedPiece = PieceType.WhiteRook
+                    });
+                    AddCaptureMove(new Move
+                    {
+                        FromSq = fromSq,
+                        ToSq = toSq,
+                        CapturedPiece = capturedPiece,
+                        PromotedPiece = PieceType.WhiteBishop
+                    });
+                    AddCaptureMove(new Move
+                    {
+                        FromSq = fromSq,
+                        ToSq = toSq,
+                        CapturedPiece = capturedPiece,
+                        PromotedPiece = PieceType.WhiteKnight
+                    });
                 }
                 else
                 {
-                    AddCaptureMove(new Move(fromSq, toSq, capturedPiece));
+                    AddCaptureMove(new Move
+                    {
+                        FromSq = fromSq,
+                        ToSq = toSq,
+                        CapturedPiece = capturedPiece
+                    });
                 }
             }
             else
             {
                 if (Board.GetRank(fromSq) == Rank.Rank2)
                 {
-                    AddCaptureMove(new Move(fromSq, toSq, capturedPiece, PieceType.BlackQueen));
-                    AddCaptureMove(new Move(fromSq, toSq, capturedPiece, PieceType.BlackRook));
-                    AddCaptureMove(new Move(fromSq, toSq, capturedPiece, PieceType.BlackBishop));
-                    AddCaptureMove(new Move(fromSq, toSq, capturedPiece, PieceType.BlackKnight));
+                    AddCaptureMove(new Move
+                    {
+                        FromSq = fromSq,
+                        ToSq = toSq,
+                        CapturedPiece = capturedPiece,
+                        PromotedPiece = PieceType.BlackQueen
+                    });
+                    AddCaptureMove(new Move
+                    {
+                        FromSq = fromSq,
+                        ToSq = toSq,
+                        CapturedPiece = capturedPiece,
+                        PromotedPiece = PieceType.BlackRook
+                    });
+                    AddCaptureMove(new Move
+                    {
+                        FromSq = fromSq,
+                        ToSq = toSq,
+                        CapturedPiece = capturedPiece,
+                        PromotedPiece = PieceType.BlackBishop
+                    });
+                    AddCaptureMove(new Move
+                    {
+                        FromSq = fromSq,
+                        ToSq = toSq,
+                        CapturedPiece = capturedPiece,
+                        PromotedPiece = PieceType.BlackKnight
+                    });
                 }
                 else
                 {
-                    AddCaptureMove(new Move(fromSq, toSq, capturedPiece));
+                    AddCaptureMove(new Move
+                    {
+                        FromSq = fromSq,
+                        ToSq = toSq,
+                        CapturedPiece = capturedPiece
+                    });
                 }
             }
         }
@@ -59,28 +117,76 @@ namespace Assets.Project.ChessEngine
             {
                 if (Board.GetRank(fromSq) == Rank.Rank7)
                 {
-                    AddQuietMove(new Move(fromSq, toSq, PieceType.WhiteQueen));
-                    AddQuietMove(new Move(fromSq, toSq, PieceType.WhiteRook));
-                    AddQuietMove(new Move(fromSq, toSq, PieceType.WhiteBishop));
-                    AddQuietMove(new Move(fromSq, toSq, PieceType.WhiteKnight));
+                    AddQuietMove(new Move
+                    {
+                        FromSq = fromSq,
+                        ToSq = toSq,
+                        PromotedPiece = PieceType.WhiteQueen
+                    });
+                    AddQuietMove(new Move
+                    {
+                        FromSq = fromSq,
+                        ToSq = toSq,
+                        PromotedPiece = PieceType.WhiteRook
+                    });
+                    AddQuietMove(new Move
+                    {
+                        FromSq = fromSq,
+                        ToSq = toSq,
+                        PromotedPiece = PieceType.WhiteBishop
+                    });
+                    AddQuietMove(new Move
+                    {
+                        FromSq = fromSq,
+                        ToSq = toSq,
+                        PromotedPiece = PieceType.WhiteKnight
+                    });
                 }
                 else
                 {
-                    AddQuietMove(new Move(fromSq, toSq));
+                    AddQuietMove(new Move
+                    {
+                        FromSq = fromSq,
+                        ToSq = toSq
+                    });
                 }
             }
             else
             {
                 if (Board.GetRank(fromSq) == Rank.Rank2)
                 {
-                    AddQuietMove(new Move(fromSq, toSq, PieceType.BlackQueen));
-                    AddQuietMove(new Move(fromSq, toSq, PieceType.BlackRook));
-                    AddQuietMove(new Move(fromSq, toSq, PieceType.BlackBishop));
-                    AddQuietMove(new Move(fromSq, toSq, PieceType.BlackKnight));
+                    AddQuietMove(new Move
+                    {
+                        FromSq = fromSq,
+                        ToSq = toSq,
+                        PromotedPiece = PieceType.BlackQueen
+                    });
+                    AddQuietMove(new Move
+                    {
+                        FromSq = fromSq,
+                        ToSq = toSq,
+                        PromotedPiece = PieceType.BlackRook
+                    });
+                    AddQuietMove(new Move
+                    {
+                        FromSq = fromSq,
+                        ToSq = toSq,
+                        PromotedPiece = PieceType.BlackBishop
+                    });
+                    AddQuietMove(new Move
+                    {
+                        FromSq = fromSq,
+                        ToSq = toSq,
+                        PromotedPiece = PieceType.BlackKnight
+                    });
                 }
                 else
                 {
-                    AddQuietMove(new Move(fromSq, toSq));
+                    AddQuietMove(new Move
+                    {
+                        FromSq = fromSq,
+                        ToSq = toSq
+                    });
                 }
             }
         }

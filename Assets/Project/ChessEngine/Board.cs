@@ -291,7 +291,7 @@ namespace Assets.Project.ChessEngine
         /* Checks if provided square is attacked by provided side. */
         public bool IsSquareAttacked(Square sq, Color side)
         {
-            CheckIntegrity(); // TODO: remove CheckIntegrity for perfomance boost
+            //CheckIntegrity(); 
 
             // pawns
             if (side == Color.White)
@@ -609,7 +609,7 @@ namespace Assets.Project.ChessEngine
 
         public MoveList GenerateAllMoves()
         {
-            CheckIntegrity(); // TODO: remove CheckIntegrity for perfomance boost
+            //CheckIntegrity();
 
             MoveList moveList = new MoveList();
             Move move;
@@ -623,10 +623,12 @@ namespace Assets.Project.ChessEngine
                     if (Pieces[(int)square + 10] == null)
                     {
                         moveList.AddPawnQuietMove(OnTurn, square, square + 10);
-                        if (Board.GetRank(square) == Rank.Rank2 && Pieces[(int)square + 20] == null)
+                        if (GetRank(square) == Rank.Rank2 && Pieces[(int)square + 20] == null)
                         {
-                            move = new Move(square, square + 20)
+                            move = new Move
                             {
+                                FromSq = square,
+                                ToSq = square + 20,
                                 IsPawnStart = true
                             };
                             moveList.AddQuietMove(move);
@@ -646,16 +648,20 @@ namespace Assets.Project.ChessEngine
                     {
                         if (square + 9 == EnPassant)
                         {
-                            move = new Move(square, square + 9)
+                            move = new Move
                             {
+                                FromSq = square,
+                                ToSq = square + 9,
                                 IsEnPassant = true
                             };
                             moveList.AddEnPassantMove(move);
                         }
                         if (square + 11 == EnPassant)
                         {
-                            move = new Move(square, square + 11)
+                            move = new Move
                             {
+                                FromSq = square,
+                                ToSq = square + 11,
                                 IsEnPassant = true
                             };
                             moveList.AddEnPassantMove(move);
@@ -669,8 +675,10 @@ namespace Assets.Project.ChessEngine
                     {
                         if (!IsSquareAttacked(Square.E1, Color.Black) && !IsSquareAttacked(Square.F1, Color.Black))
                         {
-                            move = new Move(Square.E1, Square.G1)
+                            move = new Move
                             {
+                                FromSq = Square.E1,
+                                ToSq = Square.G1,
                                 IsCastle = true
                             };
                             moveList.AddQuietMove(move);
@@ -684,8 +692,10 @@ namespace Assets.Project.ChessEngine
                     {
                         if (!IsSquareAttacked(Square.E1, Color.Black) && !IsSquareAttacked(Square.D1, Color.Black))
                         {
-                            move = new Move(Square.E1, Square.C1)
+                            move = new Move
                             {
+                                FromSq = Square.E1,
+                                ToSq = Square.C1,
                                 IsCastle = true
                             };
                             moveList.AddQuietMove(move);
@@ -702,10 +712,12 @@ namespace Assets.Project.ChessEngine
                     if (Pieces[(int)square - 10] == null)
                     {
                         moveList.AddPawnQuietMove(OnTurn, square, square - 10);
-                        if (Board.GetRank(square) == Rank.Rank7 && Pieces[(int)square - 20] == null)
+                        if (GetRank(square) == Rank.Rank7 && Pieces[(int)square - 20] == null)
                         {
-                            move = new Move(square, square - 20)
+                            move = new Move
                             {
+                                FromSq = square,
+                                ToSq = square - 20,
                                 IsPawnStart = true
                             };
                             moveList.AddQuietMove(move);
@@ -725,16 +737,20 @@ namespace Assets.Project.ChessEngine
                     {
                         if (square - 9 == EnPassant)
                         {
-                            move = new Move(square, square - 9)
+                            move = new Move
                             {
+                                FromSq = square,
+                                ToSq = square - 9,
                                 IsEnPassant = true
                             };
                             moveList.AddEnPassantMove(move);
                         }
                         if (square - 11 == EnPassant)
                         {
-                            move = new Move(square, square - 11)
+                            move = new Move
                             {
+                                FromSq = square,
+                                ToSq = square - 11,
                                 IsEnPassant = true
                             };
                             moveList.AddEnPassantMove(move);
@@ -748,8 +764,10 @@ namespace Assets.Project.ChessEngine
                     {
                         if (!IsSquareAttacked(Square.E8, Color.White) && !IsSquareAttacked(Square.F8, Color.White))
                         {
-                            move = new Move(Square.E8, Square.G8)
+                            move = new Move
                             {
+                                FromSq = Square.E8,
+                                ToSq = Square.G8,
                                 IsCastle = true
                             };
                             moveList.AddQuietMove(move);
@@ -763,8 +781,10 @@ namespace Assets.Project.ChessEngine
                     {
                         if (!IsSquareAttacked(Square.E8, Color.White) && !IsSquareAttacked(Square.D8, Color.White))
                         {
-                            move = new Move(Square.E8, Square.C8)
+                            move = new Move
                             {
+                                FromSq = Square.E8,
+                                ToSq = Square.C8,
                                 IsCastle = true
                             };
                             moveList.AddQuietMove(move);
@@ -794,12 +814,21 @@ namespace Assets.Project.ChessEngine
                             {
                                 if (piece.Color == (Color)((int)OnTurn ^ 1)) // xor operation gives opposite side as result
                                 {
-                                    move = new Move(square, tempSq, piece.GetPieceType());
+                                    move = new Move
+                                    {
+                                        FromSq = square,
+                                        ToSq = tempSq,
+                                        CapturedPiece = piece.GetPieceType()
+                                    };
                                     moveList.AddCaptureMove(move);
                                 }
                                 break;
                             }
-                            move = new Move(square, tempSq);
+                            move = new Move
+                            {
+                                FromSq = square,
+                                ToSq = tempSq
+                            };
                             moveList.AddQuietMove(move);
                             tempSq += direction;
                             piece = Pieces[(int)tempSq];
@@ -837,13 +866,22 @@ namespace Assets.Project.ChessEngine
                         {
                             if (piece.Color == (Color)((int)OnTurn ^ 1)) // xor operation gives opposite side as result
                             {
-                                move = new Move(square, tempSq, piece.GetPieceType());
+                                move = new Move
+                                {
+                                    FromSq = square,
+                                    ToSq = tempSq,
+                                    CapturedPiece = piece.GetPieceType()
+                                };
                                 moveList.AddCaptureMove(move);
                             }
                             direction = PieceDirection[(int)pieceType, index++];
                             continue;
                         }
-                        move = new Move(square, tempSq);
+                        move = new Move
+                        {
+                            FromSq = square,
+                            ToSq = tempSq
+                        };
                         moveList.AddQuietMove(move);
                         direction = PieceDirection[(int)pieceType, index++];
                     }
@@ -983,8 +1021,7 @@ namespace Assets.Project.ChessEngine
 
         public bool DoMove(Move move)
         {
-            //TODO: remove 
-            CheckIntegrity();
+            //CheckIntegrity();
 
             UndoMove undoMoveData = new UndoMove();
 
@@ -1160,9 +1197,8 @@ namespace Assets.Project.ChessEngine
                 RemovePiece(undoMoveData.Move.FromSq);
                 AddPiece(undoMoveData.Move.PromotedPiece.GetColor() == Color.White ? PieceType.WhitePawn : PieceType.BlackPawn, undoMoveData.Move.FromSq);
             }
-
-            //TODO: remove 
-            CheckIntegrity();
+            
+            //CheckIntegrity();
         }
         #endregion
     }
