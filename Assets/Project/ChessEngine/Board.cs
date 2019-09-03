@@ -1201,5 +1201,17 @@ namespace Assets.Project.ChessEngine
             //CheckIntegrity();
         }
         #endregion
+        #region Search
+        public bool IsRepetition()
+        {
+            LinkedListNode<UndoMove> current = History.Last;
+            for(int i = FiftyMove; i > 0; --i)
+            {
+                if (current.Value.StateKey == StateKey) return true;
+                current = current.Previous;
+            }
+            return false;
+        }
+        #endregion
     }
 }
