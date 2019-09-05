@@ -116,6 +116,23 @@ namespace Assets.Project.ChessEngine
             }
         }
 
+        public override bool Equals(Object obj)
+        {
+            //Check for null and compare run-time types.
+            if ((obj == null) || !GetType().Equals(obj.GetType()))
+            {
+                return false;
+            }
+            else
+            {
+                Move other = (Move)obj;
+                return (FromSq == other.FromSq) && (ToSq == other.ToSq)
+                    && (CapturedPiece == other.CapturedPiece) && (PromotedPiece == other.PromotedPiece)
+                    && (IsEnPassant == other.IsEnPassant) && (IsPawnStart == other.IsPawnStart)
+                    && (IsCastle == other.IsCastle);
+            }
+        }
+
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();

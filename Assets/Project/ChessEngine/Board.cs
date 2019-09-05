@@ -29,6 +29,8 @@ namespace Assets.Project.ChessEngine
         public ulong StateKey { get; set; } // board state hash key
 
         public LinkedList<UndoMove> History { get; set; } // list with data needed to undo past moves
+        public PvTable PvTable { get; set; }
+        public List<Move> PvMoves { get; set; }
         #endregion
         #region PublicMethods
         /* Default ctor. */
@@ -942,7 +944,7 @@ namespace Assets.Project.ChessEngine
         private void RemovePiece(Square square)
         {
             Piece piece = Pieces[(int)square];
-            
+
             HashPiece(piece, square);
 
             Pieces[(int)square] = null;
@@ -965,7 +967,7 @@ namespace Assets.Project.ChessEngine
                 Pawns[(int)piece.Color].ClearBit(square);
                 Pawns[(int)Color.Both].ClearBit(square);
             }
-            
+
             int indexOfRemovedPiece = -1;
             for (int i = 0; i < PieceCount[(int)piece.GetPieceType()]; ++i)
             {
@@ -1104,7 +1106,7 @@ namespace Assets.Project.ChessEngine
             }
 
             MovePiece(move.FromSq, move.ToSq);
-            
+
             if (move.PromotedPiece != PieceType.None)
             {
                 RemovePiece(move.ToSq);
@@ -1186,7 +1188,7 @@ namespace Assets.Project.ChessEngine
             {
                 Kings[(int)OnTurn] = undoMoveData.Move.FromSq;
             }
-            
+
             if (undoMoveData.Move.CapturedPiece != PieceType.None)
             {
                 AddPiece(undoMoveData.Move.CapturedPiece, undoMoveData.Move.ToSq);
@@ -1197,15 +1199,65 @@ namespace Assets.Project.ChessEngine
                 RemovePiece(undoMoveData.Move.FromSq);
                 AddPiece(undoMoveData.Move.PromotedPiece.GetColor() == Color.White ? PieceType.WhitePawn : PieceType.BlackPawn, undoMoveData.Move.FromSq);
             }
-            
+
             //CheckIntegrity();
+        }
+
+        public bool MoveExists(Move move)
+        {
+            MoveList moveList = GenerateAllMoves();
+
+            foreach(Move currentMove in moveList)
+            {
+                if (currentMove != move || !DoMove(move)) continue;
+                else
+                {
+                    UndoMove();
+                    return true;
+                }
+            }
+            return false;
+        }
+        #endregion
+        #region PrincipalVariation
+        public Move ProbePvMove()
+        {
+            if (PvTable.TryGetValue(StateKey, out var value))
+            {
+                return value.Move;
+            }
+            else return null;
+        }
+
+        public int GetPvLine(int depth)
+        {
+            Move move = ProbePvMove();
+            int count = 0;
+
+            while (move != null && count < depth)
+            {
+                if (MoveExists(move))
+                {
+                    DoMove(move);
+                    PvMoves.Add(move);
+                }
+                else break;
+                move = ProbePvMove();
+            }
+
+            while (History.Count > 0)
+            {
+                UndoMove();
+            }
+
+            return count;
         }
         #endregion
         #region Search
         public bool IsRepetition()
         {
             LinkedListNode<UndoMove> current = History.Last;
-            for(int i = FiftyMove; i > 0; --i)
+            for (int i = FiftyMove; i > 0; --i)
             {
                 if (current.Value.StateKey == StateKey) return true;
                 current = current.Previous;
