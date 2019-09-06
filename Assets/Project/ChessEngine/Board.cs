@@ -31,6 +31,8 @@ namespace Assets.Project.ChessEngine
         public LinkedList<UndoMove> History { get; set; } // list with data needed to undo past moves
         public PvTable PvTable { get; set; }
         public List<Move> PvMoves { get; set; }
+        public int[,] SearchHistory { get; set; }
+        public int[,] SearchKillers { get; set; }
         #endregion
         #region PublicMethods
         /* Default ctor. */
@@ -1253,7 +1255,134 @@ namespace Assets.Project.ChessEngine
             return count;
         }
         #endregion
+        #region Evaluation
+        private static readonly int[] PawnPositionValue = {
+        0   ,   0   ,   0   ,   0   ,   0   ,   0   ,   0   ,   0   ,
+        10  ,   10  ,   0   ,   -10 ,   -10 ,   0   ,   10  ,   10  ,
+        5   ,   0   ,   0   ,   5   ,   5   ,   0   ,   0   ,   5   ,
+        0   ,   0   ,   10  ,   20  ,   20  ,   10  ,   0   ,   0   ,
+        5   ,   5   ,   5   ,   10  ,   10  ,   5   ,   5   ,   5   ,
+        10  ,   10  ,   10  ,   20  ,   20  ,   10  ,   10  ,   10  ,
+        20  ,   20  ,   20  ,   30  ,   30  ,   20  ,   20  ,   20  ,
+        0   ,   0   ,   0   ,   0   ,   0   ,   0   ,   0   ,   0
+        };
+        private static readonly int[] KnightPositionValue = {
+        0   ,   -10 ,   0   ,   0   ,   0   ,   0   ,   -10 ,   0   ,
+        0   ,   0   ,   0   ,   5   ,   5   ,   0   ,   0   ,   0   ,
+        0   ,   0   ,   10  ,   10  ,   10  ,   10  ,   0   ,   0   ,
+        0   ,   0   ,   10  ,   20  ,   20  ,   10  ,   5   ,   0   ,
+        5   ,   10  ,   15  ,   20  ,   20  ,   15  ,   10  ,   5   ,
+        5   ,   10  ,   10  ,   20  ,   20  ,   10  ,   10  ,   5   ,
+        0   ,   0   ,   5   ,   10  ,   10  ,   5   ,   0   ,   0   ,
+        0   ,   0   ,   0   ,   0   ,   0   ,   0   ,   0   ,   0
+        };
+        private static readonly int[] BishopPositionValue = {
+        0   ,   0   ,   -10 ,   0   ,   0   ,   -10 ,   0   ,   0   ,
+        0   ,   0   ,   0   ,   10  ,   10  ,   0   ,   0   ,   0   ,
+        0   ,   0   ,   10  ,   15  ,   15  ,   10  ,   0   ,   0   ,
+        0   ,   10  ,   15  ,   20  ,   20  ,   15  ,   10  ,   0   ,
+        0   ,   10  ,   15  ,   20  ,   20  ,   15  ,   10  ,   0   ,
+        0   ,   0   ,   10  ,   15  ,   15  ,   10  ,   0   ,   0   ,
+        0   ,   0   ,   0   ,   10  ,   10  ,   0   ,   0   ,   0   ,
+        0   ,   0   ,   0   ,   0   ,   0   ,   0   ,   0   ,   0
+        };
+        private static readonly int[] RookPositionValue = {
+        0   ,   0   ,   5   ,   10  ,   10  ,   5   ,   0   ,   0   ,
+        0   ,   0   ,   5   ,   10  ,   10  ,   5   ,   0   ,   0   ,
+        0   ,   0   ,   5   ,   10  ,   10  ,   5   ,   0   ,   0   ,
+        0   ,   0   ,   5   ,   10  ,   10  ,   5   ,   0   ,   0   ,
+        0   ,   0   ,   5   ,   10  ,   10  ,   5   ,   0   ,   0   ,
+        0   ,   0   ,   5   ,   10  ,   10  ,   5   ,   0   ,   0   ,
+        25  ,   25  ,   25  ,   25  ,   25  ,   25  ,   25  ,   25  ,
+        0   ,   0   ,   5   ,   10  ,   10  ,   5   ,   0   ,   0
+        };
+        private static readonly int[] Mirror64 = {
+        56  ,   57  ,   58  ,   59  ,   60  ,   61  ,   62  ,   63  ,
+        48  ,   49  ,   50  ,   51  ,   52  ,   53  ,   54  ,   55  ,
+        40  ,   41  ,   42  ,   43  ,   44  ,   45  ,   46  ,   47  ,
+        32  ,   33  ,   34  ,   35  ,   36  ,   37  ,   38  ,   39  ,
+        24  ,   25  ,   26  ,   27  ,   28  ,   29  ,   30  ,   31  ,
+        16  ,   17  ,   18  ,   19  ,   20  ,   21  ,   22  ,   23  ,
+        8   ,   9   ,   10  ,   11  ,   12  ,   13  ,   14  ,   15  ,
+        0   ,   1   ,   2   ,   3   ,   4   ,   5   ,   6   ,   7
+        };
+
+        private int Mirror(int sq64)
+        {
+            return Mirror64[sq64];
+        }
+
+        public int EvaluatePosition()
+        {
+            int score = Material[(int)Color.White] - Material[(int)Color.Black];
+
+            PieceType pieceType;
+
+            //pawns
+            pieceType = PieceType.WhitePawn;
+            for (int i = 0; i < PieceCount[(int)pieceType]; ++i)
+            {
+                Square square = PieceList[(int)pieceType, i];
+                score += PawnPositionValue[Sq64((int)square)];
+            }
+            pieceType = PieceType.BlackPawn;
+            for (int i = 0; i < PieceCount[(int)pieceType]; ++i)
+            {
+                Square square = PieceList[(int)pieceType, i];
+                score -= PawnPositionValue[Mirror(Sq64((int)square))];
+            }
+
+            //knights
+            pieceType = PieceType.WhiteKnight;
+            for (int i = 0; i < PieceCount[(int)pieceType]; ++i)
+            {
+                Square square = PieceList[(int)pieceType, i];
+                score += KnightPositionValue[Sq64((int)square)];
+            }
+            pieceType = PieceType.BlackKnight;
+            for (int i = 0; i < PieceCount[(int)pieceType]; ++i)
+            {
+                Square square = PieceList[(int)pieceType, i];
+                score -= KnightPositionValue[Mirror(Sq64((int)square))];
+            }
+
+            //bishops
+            pieceType = PieceType.WhiteBishop;
+            for (int i = 0; i < PieceCount[(int)pieceType]; ++i)
+            {
+                Square square = PieceList[(int)pieceType, i];
+                score += BishopPositionValue[Sq64((int)square)];
+            }
+            pieceType = PieceType.BlackBishop;
+            for (int i = 0; i < PieceCount[(int)pieceType]; ++i)
+            {
+                Square square = PieceList[(int)pieceType, i];
+                score -= BishopPositionValue[Mirror(Sq64((int)square))];
+            }
+
+            //rooks
+            pieceType = PieceType.WhiteRook;
+            for (int i = 0; i < PieceCount[(int)pieceType]; ++i)
+            {
+                Square square = PieceList[(int)pieceType, i];
+                score += PawnPositionValue[Sq64((int)square)];
+            }
+            pieceType = PieceType.BlackRook;
+            for (int i = 0; i < PieceCount[(int)pieceType]; ++i)
+            {
+                Square square = PieceList[(int)pieceType, i];
+                score -= PawnPositionValue[Mirror(Sq64((int)square))];
+            }
+
+            if (OnTurn == Color.White) return score;
+            else return -score;
+        }
+        #endregion
         #region Search
+        public void CheckUp()
+        {
+            // .. check if time up, or interrupt from gui
+        }
         public bool IsRepetition()
         {
             LinkedListNode<UndoMove> current = History.Last;
@@ -1263,6 +1392,22 @@ namespace Assets.Project.ChessEngine
                 current = current.Previous;
             }
             return false;
+        }
+        public void ClearForSearch(SearchInfo searchInfo)
+        {
+
+        }
+        public void SearchPosition(SearchInfo searchInfo)
+        {
+            // .. iterative deepening, search init
+        }
+        public int AlphaBeta(int alpha, int beta, int depth, SearchInfo searchInfo, bool doNull)
+        {
+            return 0;
+        }
+        public int Quiescence(int alpha, int beta, SearchInfo searchInfo)
+        {
+            return 0;
         }
         #endregion
     }
