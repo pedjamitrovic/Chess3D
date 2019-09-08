@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Assets.Project.ChessEngine.Pieces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,7 +23,7 @@ namespace Assets.Project.ChessEngine
             move.Score = 0;
             Add(move);
         }
-        public void AddPawnCaptureMove(Color onTurn, Square fromSq, Square toSq, PieceType capturedPiece)
+        public void AddPawnCaptureMove(Color onTurn, Square fromSq, Square toSq, char capturedPiece)
         {
             if (onTurn == Color.White)
             {
@@ -33,28 +34,28 @@ namespace Assets.Project.ChessEngine
                         FromSq = fromSq,
                         ToSq = toSq,
                         CapturedPiece = capturedPiece,
-                        PromotedPiece = PieceType.WhiteQueen
+                        PromotedPiece = Queen.GetLabel(Color.White)
                     });
                     AddCaptureMove(new Move
                     {
                         FromSq = fromSq,
                         ToSq = toSq,
                         CapturedPiece = capturedPiece,
-                        PromotedPiece = PieceType.WhiteRook
+                        PromotedPiece = Rook.GetLabel(Color.White)
                     });
                     AddCaptureMove(new Move
                     {
                         FromSq = fromSq,
                         ToSq = toSq,
                         CapturedPiece = capturedPiece,
-                        PromotedPiece = PieceType.WhiteBishop
+                        PromotedPiece = Bishop.GetLabel(Color.White)
                     });
                     AddCaptureMove(new Move
                     {
                         FromSq = fromSq,
                         ToSq = toSq,
                         CapturedPiece = capturedPiece,
-                        PromotedPiece = PieceType.WhiteKnight
+                        PromotedPiece = Knight.GetLabel(Color.White)
                     });
                 }
                 else
@@ -76,28 +77,28 @@ namespace Assets.Project.ChessEngine
                         FromSq = fromSq,
                         ToSq = toSq,
                         CapturedPiece = capturedPiece,
-                        PromotedPiece = PieceType.BlackQueen
+                        PromotedPiece = Queen.GetLabel(Color.Black)
                     });
                     AddCaptureMove(new Move
                     {
                         FromSq = fromSq,
                         ToSq = toSq,
                         CapturedPiece = capturedPiece,
-                        PromotedPiece = PieceType.BlackRook
+                        PromotedPiece = Rook.GetLabel(Color.Black)
                     });
                     AddCaptureMove(new Move
                     {
                         FromSq = fromSq,
                         ToSq = toSq,
                         CapturedPiece = capturedPiece,
-                        PromotedPiece = PieceType.BlackBishop
+                        PromotedPiece = Bishop.GetLabel(Color.Black)
                     });
                     AddCaptureMove(new Move
                     {
                         FromSq = fromSq,
                         ToSq = toSq,
                         CapturedPiece = capturedPiece,
-                        PromotedPiece = PieceType.BlackKnight
+                        PromotedPiece = Knight.GetLabel(Color.Black)
                     });
                 }
                 else
@@ -121,25 +122,25 @@ namespace Assets.Project.ChessEngine
                     {
                         FromSq = fromSq,
                         ToSq = toSq,
-                        PromotedPiece = PieceType.WhiteQueen
+                        PromotedPiece = Queen.GetLabel(Color.White)
                     });
                     AddQuietMove(new Move
                     {
                         FromSq = fromSq,
                         ToSq = toSq,
-                        PromotedPiece = PieceType.WhiteRook
+                        PromotedPiece = Rook.GetLabel(Color.White)
                     });
                     AddQuietMove(new Move
                     {
                         FromSq = fromSq,
                         ToSq = toSq,
-                        PromotedPiece = PieceType.WhiteBishop
+                        PromotedPiece = Bishop.GetLabel(Color.White)
                     });
                     AddQuietMove(new Move
                     {
                         FromSq = fromSq,
                         ToSq = toSq,
-                        PromotedPiece = PieceType.WhiteKnight
+                        PromotedPiece = Knight.GetLabel(Color.White)
                     });
                 }
                 else
@@ -159,25 +160,25 @@ namespace Assets.Project.ChessEngine
                     {
                         FromSq = fromSq,
                         ToSq = toSq,
-                        PromotedPiece = PieceType.BlackQueen
+                        PromotedPiece = Queen.GetLabel(Color.Black)
                     });
                     AddQuietMove(new Move
                     {
                         FromSq = fromSq,
                         ToSq = toSq,
-                        PromotedPiece = PieceType.BlackRook
+                        PromotedPiece = Rook.GetLabel(Color.Black)
                     });
                     AddQuietMove(new Move
                     {
                         FromSq = fromSq,
                         ToSq = toSq,
-                        PromotedPiece = PieceType.BlackBishop
+                        PromotedPiece = Bishop.GetLabel(Color.Black)
                     });
                     AddQuietMove(new Move
                     {
                         FromSq = fromSq,
                         ToSq = toSq,
-                        PromotedPiece = PieceType.BlackKnight
+                        PromotedPiece = Knight.GetLabel(Color.Black)
                     });
                 }
                 else

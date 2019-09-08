@@ -1,6 +1,5 @@
 ﻿namespace Assets.Project.ChessEngine
 {
-    public enum PieceType { None, WhitePawn, WhiteKnight, WhiteBishop, WhiteRook, WhiteQueen, WhiteKing, BlackPawn, BlackKnight, BlackBishop, BlackRook, BlackQueen, BlackKing, OffLimits };
     public enum File { FileA, FileB, FileC, FileD, FileE, FileF, FileG, FileH };
     public enum Rank { Rank1, Rank2, Rank3, Rank4, Rank5, Rank6, Rank7, Rank8 };
     public enum Color { White, Black, Both };
@@ -22,24 +21,6 @@
         public static readonly int Infinity = 100000;
         public static readonly int MaxSearchDepth = 16;
         public static readonly int IsMate = Infinity - MaxSearchDepth;
-    }
-    public static class PieceTypeMethods
-    {
-        public static Color[] PieceColor = { Color.Both, Color.White, Color.White, Color.White, Color.White, Color.White, Color.White, Color.Black, Color.Black, Color.Black, Color.Black, Color.Black, Color.Black };
-        public static int[] PieceValue = { 0, 100, 325, 325, 550, 1000, 50000, 100, 325, 325, 550, 1000, 50000 };
-        public static bool[] PieceBig = { false, false, true, true, true, true, true, false, true, true, true, true, true };
-        public static bool[] PieceMaj = { false, false, false, false, true, true, true, false, false, false, true, true, true };
-        public static bool[] PieceMin = { false, false, true, true, false, false, false, false, true, true, false, false, false };
-        public static string PieceLabels = "-PNBRQKpnbrqkX";
-
-        public static Color GetColor(this PieceType pt) { return PieceColor[(int)pt]; }
-        public static int GetValue(this PieceType pt) { return PieceValue[(int)pt]; }
-        public static bool IsBig(this PieceType pt) { return PieceBig[(int)pt]; }
-        public static bool IsMajor(this PieceType pt) { return PieceMaj[(int)pt]; }
-        public static bool IsMinor(this PieceType pt) { return PieceMin[(int)pt]; }
-        public static bool IsPawn(this PieceType pt) { return (pt == PieceType.BlackPawn || pt == PieceType.WhitePawn); }
-        public static bool IsKing(this PieceType pt) { return (pt == PieceType.BlackKing || pt == PieceType.WhiteKing); }
-        public static string GetLabel(this PieceType pt) { return PieceLabels[(int)pt].ToString(); }
     }
 
     public static class FileMethods
@@ -79,18 +60,5 @@
         public static string ColorLabels = "wb-";
 
         public static string GetLabel(this Color s) { return ColorLabels[(int)s].ToString(); }
-    }
-
-    public static class StringExtensions
-    {
-        public static string AlignCenter(this string s, int width)
-        {
-            if (s.Length >= width) return s;
-
-            int leftPadding = (width - s.Length) / 2;
-            int rightPadding = width - s.Length - leftPadding;
-
-            return new string(' ', leftPadding) + s + new string(' ', rightPadding);
-        }
     }
 }

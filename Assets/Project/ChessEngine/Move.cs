@@ -1,4 +1,5 @@
 ﻿using Assets.Project.ChessEngine.Exceptions;
+using Assets.Project.ChessEngine.Pieces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,7 +25,37 @@ namespace Assets.Project.ChessEngine
         private static readonly int isPawnStartMask = 0x80000;
         private static readonly int promotedPieceMask = 0xF;
         private static readonly int isCastleMask = 0x1000000;
-        
+        private static readonly Dictionary<char, int> pieceLabelToValueMap =  new Dictionary<char, int>()
+        {
+            { Pawn.GetLabel(Color.White), 1 },
+            { Knight.GetLabel(Color.White), 2 },
+            { Bishop.GetLabel(Color.White), 3 },
+            { Rook.GetLabel(Color.White), 4 },
+            { Queen.GetLabel(Color.White), 5 },
+            { King.GetLabel(Color.White), 6 },
+            { Pawn.GetLabel(Color.Black), 7 },
+            { Knight.GetLabel(Color.Black), 8 },
+            { Bishop.GetLabel(Color.Black), 9 },
+            { Rook.GetLabel(Color.Black), 10 },
+            { Queen.GetLabel(Color.Black), 11 },
+            { King.GetLabel(Color.Black), 12 }
+        };
+        private static readonly Dictionary<int, char> pieceValueToLabelMap = new Dictionary<int, char>()
+        {
+            { 1, Pawn.GetLabel(Color.White) },
+            { 2, Knight.GetLabel(Color.White) },
+            { 3, Bishop.GetLabel(Color.White) },
+            { 4, Rook.GetLabel(Color.White) },
+            { 5, Queen.GetLabel(Color.White) },
+            { 6, King.GetLabel(Color.White) },
+            { 7, Pawn.GetLabel(Color.Black) },
+            { 8, Knight.GetLabel(Color.Black) },
+            { 9, Bishop.GetLabel(Color.Black) },
+            { 10, Rook.GetLabel(Color.Black) },
+            { 11, Queen.GetLabel(Color.Black) },
+            { 12, King.GetLabel(Color.Black) }
+        };
+
         public int Value { get; private set; } = 0;
         public int Score { get; set; } = 0;
 
@@ -48,23 +79,53 @@ namespace Assets.Project.ChessEngine
             }
         }
 
-        public PieceType CapturedPiece
+        public char? CapturedPiece
         {
-            get { return (PieceType)((Value >> 14) & capturedPieceMask); }
+            get
+            {
+                if (pieceValueToLabelMap.TryGetValue(((Value >> 14) & capturedPieceMask), out char retVal))
+                {
+                    return retVal;
+                }
+                return null;
+            }
             set
             {
-                if ((int)value < 0 || (int)value > 15) throw new IllegalArgumentException("Invalid argument provided for CapturedPiece property. Expected [0-15].");
-                Value |= ((int)value << 14);
+                if (value.HasValue)
+                {
+                    if (pieceLabelToValueMap.TryGetValue(value.Value, out int val))
+                    {
+                        Value &= (~(capturedPieceMask << 14));
+                        Value |= (val << 14);
+                    }
+                    else throw new IllegalArgumentException("Invalid argument provided for CapturedPiece property.");
+                }
+                else Value &= (~(capturedPieceMask << 14)); // set null
             }
         }
 
-        public PieceType PromotedPiece
+        public char? PromotedPiece
         {
-            get { return (PieceType)((Value >> 20) & promotedPieceMask); }
+            get
+            {
+                if (pieceValueToLabelMap.TryGetValue(((Value >> 20) & promotedPieceMask), out char retVal))
+                {
+                    return retVal;
+                }
+                return null;
+            }
             set
             {
-                if ((int)value < 0 || (int)value > 15) throw new IllegalArgumentException("Invalid argument provided for PromotedPiece property. Expected [0-15].");
-                Value |= ((int)value << 20);
+                if (value.HasValue)
+                {
+                    if (pieceLabelToValueMap.TryGetValue(value.Value, out int val))
+                    {
+                        Value &= (~(capturedPieceMask << 20));
+                        Value |= (val << 20);
+                    }
+                    else throw new IllegalArgumentException("Invalid argument provided for PromotedPiece property.");
+                }
+                else Value &= (~(capturedPieceMask << 20)); // set null
             }
         }
 
@@ -133,17 +194,31 @@ namespace Assets.Project.ChessEngine
             }
         }
 
+        public override int GetHashCode()
+        {
+            var hashCode = 1200616606;
+            hashCode = hashCode * -1521134295 + Value.GetHashCode();
+            hashCode = hashCode * -1521134295 + Score.GetHashCode();
+            hashCode = hashCode * -1521134295 + FromSq.GetHashCode();
+            hashCode = hashCode * -1521134295 + ToSq.GetHashCode();
+            hashCode = hashCode * -1521134295 + EqualityComparer<char?>.Default.GetHashCode(CapturedPiece);
+            hashCode = hashCode * -1521134295 + EqualityComparer<char?>.Default.GetHashCode(PromotedPiece);
+            hashCode = hashCode * -1521134295 + IsEnPassant.GetHashCode();
+            hashCode = hashCode * -1521134295 + IsPawnStart.GetHashCode();
+            hashCode = hashCode * -1521134295 + IsCastle.GetHashCode();
+            return hashCode;
+        }
+
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
             string fromSq = FromSq.GetLabel();
             string toSq = ToSq.GetLabel();
-            string promotedPiece = "";
-            if (PromotedPiece != 0)
+            sb.Append(fromSq + toSq);
+            if (PromotedPiece.HasValue)
             {
-                promotedPiece = PromotedPiece.GetLabel().ToLower();
+                sb.Append(char.ToLower(PromotedPiece.Value));
             }
-            sb.Append(fromSq + toSq + promotedPiece);
             return sb.ToString();
         }
     }

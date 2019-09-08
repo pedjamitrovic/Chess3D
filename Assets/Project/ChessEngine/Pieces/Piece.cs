@@ -1,4 +1,7 @@
 ﻿
+using Assets.Project.ChessEngine.Exceptions;
+using System;
+
 namespace Assets.Project.ChessEngine.Pieces
 {
     public abstract class Piece
@@ -16,25 +19,58 @@ namespace Assets.Project.ChessEngine.Pieces
         public abstract bool IsBig();
         public abstract bool IsMajor();
         public abstract bool IsMinor();
-        public abstract string GetLabel();
-        public abstract PieceType GetPieceType();
-        public static Piece CreatePiece(PieceType type, Square square)
+        public abstract char GetLabel();
+        public static char GetLabel(Color color) { return '-'; }
+        public static Piece CreatePiece(Type pieceType, Color color, Square square)
         {
-            switch (type)
+            if (pieceType.Equals(typeof(Pawn)))
             {
-                case PieceType.BlackPawn: return new Pawn(Color.Black, square);
-                case PieceType.BlackKnight: return new Knight(Color.Black, square);
-                case PieceType.BlackBishop: return new Bishop(Color.Black, square);
-                case PieceType.BlackRook: return new Rook(Color.Black, square);
-                case PieceType.BlackKing: return new King(Color.Black, square);
-                case PieceType.BlackQueen: return new Queen(Color.Black, square);
-                case PieceType.WhitePawn: return new Pawn(Color.White, square);
-                case PieceType.WhiteKnight: return new Knight(Color.White, square);
-                case PieceType.WhiteBishop: return new Bishop(Color.White, square);
-                case PieceType.WhiteRook: return new Rook(Color.White, square);
-                case PieceType.WhiteKing: return new King(Color.White, square);
-                case PieceType.WhiteQueen: return new Queen(Color.White, square);
-                default: throw new System.Exception("Invalid PieceType provided.");
+                return new Pawn(color, square);
+            }
+            if (pieceType.Equals(typeof(Knight)))
+            {
+                return new Knight(color, square);
+            }
+            if (pieceType.Equals(typeof(Bishop)))
+            {
+                return new Bishop(color, square);
+            }
+            if (pieceType.Equals(typeof(Rook)))
+            {
+                return new Rook(color, square);
+            }
+            if (pieceType.Equals(typeof(King)))
+            {
+                return new King(color, square);
+            }
+            if (pieceType.Equals(typeof(Queen)))
+            {
+                return new Queen(color, square);
+            }
+            throw new IllegalArgumentException("Invalid PieceType provided.");
+        }
+        public static Piece CreatePiece(char pieceLabel, Square square)
+        {
+            Type pieceType = GetTypeFromPieceLabel(pieceLabel);
+            Color color = GetColorFromPieceLabel(pieceLabel);
+            return CreatePiece(pieceType, color, square);
+        }
+        public static Color GetColorFromPieceLabel(char pieceLabel)
+        {
+            if (char.IsUpper(pieceLabel)) return Color.White;
+            else return Color.Black;
+        }
+        public static Type GetTypeFromPieceLabel(char pieceLabel)
+        {
+            switch (pieceLabel)
+            {
+                case 'p': case 'P': return typeof(Pawn);
+                case 'n': case 'N': return typeof(Knight);
+                case 'b': case 'B': return typeof(Bishop);
+                case 'r': case 'R': return typeof(Rook);
+                case 'k': case 'K': return typeof(King);
+                case 'q': case 'Q': return typeof(Queen);
+                default: throw new IllegalArgumentException();
             }
         }
     }

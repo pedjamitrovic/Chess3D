@@ -15,9 +15,9 @@
 
         }
 
-        public override string GetLabel()
+        public override char GetLabel()
         {
-            return "X";
+            return 'X';
         }
 
         public override bool IsBig()
@@ -35,9 +35,9 @@
             return false;
         }
 
-        public override PieceType GetPieceType()
+        public static new char GetLabel(Color color)
         {
-            return PieceType.OffLimits;
+            return 'X';
         }
     }
 }

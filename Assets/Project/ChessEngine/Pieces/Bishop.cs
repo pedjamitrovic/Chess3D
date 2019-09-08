@@ -7,10 +7,10 @@
 
         }
 
-        public override string GetLabel()
+        public override char GetLabel()
         {
-            if (Color == Color.White) return "B";
-            else return "b";
+            if (Color == Color.White) return 'B';
+            else return 'b';
         }
 
         public override bool IsBig()
@@ -28,10 +28,10 @@
             return true;
         }
 
-        public override PieceType GetPieceType()
+        public new static char GetLabel(Color color)
         {
-            if (Color == Color.White) return PieceType.WhiteBishop;
-            else return PieceType.BlackBishop;
+            if (color == Color.White) return 'B';
+            else return 'b';
         }
     }
 }

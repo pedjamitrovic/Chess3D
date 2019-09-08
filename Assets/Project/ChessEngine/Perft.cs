@@ -9,7 +9,6 @@ namespace Assets.Project.ChessEngine
     public class Perft
     {
         private long leafNodes;
-
         public long CountLeafNodes(Board board, int depth)
         {
             if (depth < 1) throw new IllegalArgumentException("Perft testing depth should be at least 1. Provided: " + depth);
@@ -19,7 +18,6 @@ namespace Assets.Project.ChessEngine
             leafNodes = 0;
 
             MoveList moveList = board.GenerateAllMoves();
-
             foreach (Move move in moveList)
             {
                 if (!board.DoMove(move)) continue;
@@ -40,7 +38,6 @@ namespace Assets.Project.ChessEngine
             }
 
             MoveList moveList = board.GenerateAllMoves();
-
             foreach (Move move in moveList)
             {
                 if (!board.DoMove(move)) continue;
