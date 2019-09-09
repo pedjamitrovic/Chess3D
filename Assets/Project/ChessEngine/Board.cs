@@ -2,6 +2,7 @@
 using Assets.Project.ChessEngine.Pieces;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace Assets.Project.ChessEngine
@@ -27,7 +28,7 @@ namespace Assets.Project.ChessEngine
         public LinkedList<UndoMove> History { get; set; } // list with data needed to undo past moves
         public PvTable PvTable { get; set; }
         public List<Move> PvMoves { get; set; }
-        public int[,] SearchHistory { get; set; }
+        public Dictionary<char, int[]> SearchHistory { get; set; }
         public int[,] SearchKillers { get; set; }
         #endregion
         #region PublicMethods
@@ -392,7 +393,7 @@ namespace Assets.Project.ChessEngine
         public static readonly int MajorPiecesRepresentationNumber = 3; // keeping track of both white and black queens and rooks count
         public static readonly int MinorPiecesRepresentationNumber = 3; // keeping track of both white and black knights and bishops count
         public static readonly int MaxCountOfPieceType = 10; // 8 pawns can upgrade to same figure, plus max 2 same figures on board
-
+        
         private static readonly int[] SqIndexes120To64;
         private static readonly int[] SqIndexes64To120;
         private static readonly int[] FileBoard;
@@ -1349,9 +1350,28 @@ namespace Assets.Project.ChessEngine
             }
             return false;
         }
-        public void ClearForSearch(SearchInfo searchInfo)
+        public SearchInfo ClearForSearch()
         {
+            SearchHistory = new Dictionary<char, int[]>()
+            {
+                { Pawn.GetLabel(Color.White), new int[BoardSquaresNumber] },
+                { Knight.GetLabel(Color.White), new int[BoardSquaresNumber] },
+                { Bishop.GetLabel(Color.White), new int[BoardSquaresNumber] },
+                { Rook.GetLabel(Color.White), new int[BoardSquaresNumber] },
+                { Queen.GetLabel(Color.White), new int[BoardSquaresNumber] },
+                { King.GetLabel(Color.White), new int[BoardSquaresNumber] },
+                { Pawn.GetLabel(Color.Black), new int[BoardSquaresNumber] },
+                { Knight.GetLabel(Color.Black), new int[BoardSquaresNumber] },
+                { Bishop.GetLabel(Color.Black), new int[BoardSquaresNumber] },
+                { Rook.GetLabel(Color.Black), new int[BoardSquaresNumber] },
+                { Queen.GetLabel(Color.Black), new int[BoardSquaresNumber] },
+                { King.GetLabel(Color.Black), new int[BoardSquaresNumber] }
+            };
+            SearchKillers = new int[2, Constants.MaxSearchDepth];
+            PvTable = new PvTable();
+            Ply = 0;
 
+            return new SearchInfo();
         }
         public void SearchPosition(SearchInfo searchInfo)
         {

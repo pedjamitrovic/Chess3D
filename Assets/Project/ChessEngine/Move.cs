@@ -25,36 +25,6 @@ namespace Assets.Project.ChessEngine
         private static readonly int isPawnStartMask = 0x80000;
         private static readonly int promotedPieceMask = 0xF;
         private static readonly int isCastleMask = 0x1000000;
-        private static readonly Dictionary<char, int> pieceLabelToValueMap =  new Dictionary<char, int>()
-        {
-            { Pawn.GetLabel(Color.White), 1 },
-            { Knight.GetLabel(Color.White), 2 },
-            { Bishop.GetLabel(Color.White), 3 },
-            { Rook.GetLabel(Color.White), 4 },
-            { Queen.GetLabel(Color.White), 5 },
-            { King.GetLabel(Color.White), 6 },
-            { Pawn.GetLabel(Color.Black), 7 },
-            { Knight.GetLabel(Color.Black), 8 },
-            { Bishop.GetLabel(Color.Black), 9 },
-            { Rook.GetLabel(Color.Black), 10 },
-            { Queen.GetLabel(Color.Black), 11 },
-            { King.GetLabel(Color.Black), 12 }
-        };
-        private static readonly Dictionary<int, char> pieceValueToLabelMap = new Dictionary<int, char>()
-        {
-            { 1, Pawn.GetLabel(Color.White) },
-            { 2, Knight.GetLabel(Color.White) },
-            { 3, Bishop.GetLabel(Color.White) },
-            { 4, Rook.GetLabel(Color.White) },
-            { 5, Queen.GetLabel(Color.White) },
-            { 6, King.GetLabel(Color.White) },
-            { 7, Pawn.GetLabel(Color.Black) },
-            { 8, Knight.GetLabel(Color.Black) },
-            { 9, Bishop.GetLabel(Color.Black) },
-            { 10, Rook.GetLabel(Color.Black) },
-            { 11, Queen.GetLabel(Color.Black) },
-            { 12, King.GetLabel(Color.Black) }
-        };
 
         public int Value { get; private set; } = 0;
         public int Score { get; set; } = 0;
@@ -83,22 +53,30 @@ namespace Assets.Project.ChessEngine
         {
             get
             {
-                if (pieceValueToLabelMap.TryGetValue(((Value >> 14) & capturedPieceMask), out char retVal))
+                try
                 {
-                    return retVal;
+                    int key = (Value >> 14) & promotedPieceMask;
+                    return Piece.GetPieceLabelFromValue(key);
                 }
-                return null;
+                catch (Exception e) when (e is KeyNotFoundException || e is ArgumentNullException)
+                {
+                    return null;
+                }
             }
             set
             {
                 if (value.HasValue)
                 {
-                    if (pieceLabelToValueMap.TryGetValue(value.Value, out int val))
+                    try
                     {
-                        Value &= (~(capturedPieceMask << 14));
+                        int val = Piece.GetValueFromPieceLabel(value.Value);
+                        Value &= (~(promotedPieceMask << 14));
                         Value |= (val << 14);
                     }
-                    else throw new IllegalArgumentException("Invalid argument provided for CapturedPiece property.");
+                    catch (Exception e) when (e is KeyNotFoundException || e is ArgumentNullException)
+                    {
+                        throw new IllegalArgumentException("Invalid argument provided for CapturedPiece property.");
+                    }
                 }
                 else Value &= (~(capturedPieceMask << 14)); // set null
             }
@@ -108,22 +86,30 @@ namespace Assets.Project.ChessEngine
         {
             get
             {
-                if (pieceValueToLabelMap.TryGetValue(((Value >> 20) & promotedPieceMask), out char retVal))
+                try
                 {
-                    return retVal;
+                    int key = (Value >> 20) & promotedPieceMask;
+                    return Piece.GetPieceLabelFromValue(key);
                 }
-                return null;
+                catch (Exception e) when (e is KeyNotFoundException || e is ArgumentNullException)
+                {
+                    return null;
+                }
             }
             set
             {
                 if (value.HasValue)
                 {
-                    if (pieceLabelToValueMap.TryGetValue(value.Value, out int val))
+                    try
                     {
+                        int val = Piece.GetValueFromPieceLabel(value.Value);
                         Value &= (~(capturedPieceMask << 20));
                         Value |= (val << 20);
                     }
-                    else throw new IllegalArgumentException("Invalid argument provided for PromotedPiece property.");
+                    catch(Exception e) when (e is KeyNotFoundException || e is ArgumentNullException)
+                    {
+                        throw new IllegalArgumentException("Invalid argument provided for PromotedPiece property.");
+                    }
                 }
                 else Value &= (~(capturedPieceMask << 20)); // set null
             }
