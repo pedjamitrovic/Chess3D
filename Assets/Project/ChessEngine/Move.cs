@@ -173,10 +173,7 @@ namespace Assets.Project.ChessEngine
             else
             {
                 Move other = (Move)obj;
-                return (FromSq == other.FromSq) && (ToSq == other.ToSq)
-                    && (CapturedPiece == other.CapturedPiece) && (PromotedPiece == other.PromotedPiece)
-                    && (IsEnPassant == other.IsEnPassant) && (IsPawnStart == other.IsPawnStart)
-                    && (IsCastle == other.IsCastle);
+                return Value == other.Value;
             }
         }
 

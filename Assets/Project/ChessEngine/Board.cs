@@ -1168,7 +1168,11 @@ namespace Assets.Project.ChessEngine
 
             foreach (Move currentMove in moveList)
             {
-                if (currentMove != move || !DoMove(move)) continue;
+                if (currentMove.Equals(move)) continue;
+                if (!DoMove(move))
+                {
+                    return false;
+                }
                 else
                 {
                     UndoMove();
@@ -1192,6 +1196,8 @@ namespace Assets.Project.ChessEngine
         {
             Move move = ProbePvMove();
             int count = 0;
+
+            PvMoves = new List<Move>();
 
             while (move != null && count < depth)
             {
@@ -1350,7 +1356,7 @@ namespace Assets.Project.ChessEngine
             }
             return false;
         }
-        public SearchInfo ClearForSearch()
+        private void PrepareForSearch()
         {
             SearchHistory = new Dictionary<char, int[]>()
             {
@@ -1370,18 +1376,83 @@ namespace Assets.Project.ChessEngine
             SearchKillers = new int[2, Constants.MaxSearchDepth];
             PvTable = new PvTable();
             Ply = 0;
+        }
+        public string SearchPosition(SearchInfo info)
+        {
+            PrepareForSearch();
 
-            return new SearchInfo();
+            Move bestMove = null;
+            int bestScore = -Constants.Infinity;
+
+            StringBuilder sb = new StringBuilder();
+
+            for(int currentDepth = 1; currentDepth <= info.DepthLimit; ++currentDepth) // iterative deepening
+            {
+                bestScore = AlphaBeta(-Constants.Infinity, Constants.Infinity, currentDepth, info, true);
+                GetPvLine(currentDepth);
+                bestMove = PvMoves.Count > 0 ? PvMoves[0] : null;
+
+                sb.AppendFormat("Depth: {0} Score: {1} Move: {2}, NodesVisited: {3} ", currentDepth, bestScore, bestMove, info.NodesVisited);
+                sb.Append("Pv:");
+                foreach(Move move in PvMoves)
+                {
+                    sb.AppendFormat(" {0}", move);
+                }
+                sb.AppendFormat(" Ordering: {0}", info.Fh > 0 ? (info.Fhf / info.Fh).ToString("F") : "-1");
+                sb.Append(Environment.NewLine);
+            }
+            return sb.ToString();
         }
-        public void SearchPosition(SearchInfo searchInfo)
+        public int AlphaBeta(int alpha, int beta, int depth, SearchInfo info, bool doNull)
         {
-            // .. iterative deepening, search init
+            ++info.NodesVisited;
+
+            if (depth == 0) return EvaluatePosition();
+
+            if (IsRepetition() || FiftyMove >= 100) return 0; // draw
+
+            if (Ply >= Constants.MaxSearchDepth) return EvaluatePosition();
+
+            int legalMovesCount = 0;
+            int oldAlpha = alpha;
+            Move bestMove = null;
+            int score = -Constants.Infinity;
+
+            foreach(Move move in GenerateAllMoves())
+            {
+                if (!DoMove(move)) continue;
+
+                ++legalMovesCount;
+                score = -AlphaBeta(-beta, -alpha, depth - 1, info, true);
+                UndoMove();
+
+                if (score > alpha)
+                {
+                    if (score >= beta)
+                    {
+                        if (legalMovesCount == 1) ++info.Fhf;
+                        ++info.Fh;
+                        return beta;
+                    }
+                    alpha = score;
+                    bestMove = move;
+                }
+            }
+
+            if (legalMovesCount == 0)
+            {
+                if (IsSquareAttacked(Kings[(int)OnTurn], (Color)((int)OnTurn ^ 1)))
+                {
+                    return -Constants.IsMate + Ply;
+                }
+                else return 0;
+            }
+
+            if (alpha != oldAlpha) { PvTable.StoreHashEntry(this, bestMove, score, depth, 0); }
+
+            return alpha;
         }
-        public int AlphaBeta(int alpha, int beta, int depth, SearchInfo searchInfo, bool doNull)
-        {
-            return 0;
-        }
-        public int Quiescence(int alpha, int beta, SearchInfo searchInfo)
+        public int Quiescence(int alpha, int beta, SearchInfo info)
         {
             return 0;
         }

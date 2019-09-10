@@ -1,12 +1,14 @@
 ﻿using Assets.Project.ChessEngine.Exceptions;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
+using static Assets.Project.ChessEngine.PvTable;
 
 namespace Assets.Project.ChessEngine
 {
-    public class PvTable : Dictionary<ulong, PvTable.PvTableValue>
+    public class PvTable : Dictionary<ulong, PvTableValue>
     {
         public class PvTableValue
         {
@@ -66,7 +68,7 @@ namespace Assets.Project.ChessEngine
             if (score > Constants.IsMate) score += board.Ply;
             else if (score < -Constants.IsMate) score -= board.Ply;
 
-            Add(board.StateKey, new PvTableValue { Move = move, Score = score, Depth = depth, Hf = hf });
+            this[board.StateKey] = new PvTableValue() { Move = move, Score = score, Depth = depth, Hf = hf };
         }
     }
 }
