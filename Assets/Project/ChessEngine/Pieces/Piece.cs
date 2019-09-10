@@ -10,6 +10,8 @@ namespace Assets.Project.ChessEngine.Pieces
         public Color Color { get; set; }
         public Square Square { get; set; }
         public int Value { get; set; }
+        public abstract char Label { get; }
+        public abstract int Index { get; }
 
         public Piece(Color color, Square square, int value)
         {
@@ -20,99 +22,75 @@ namespace Assets.Project.ChessEngine.Pieces
         public abstract bool IsBig();
         public abstract bool IsMajor();
         public abstract bool IsMinor();
-        public abstract char GetLabel();
-
-        private static readonly Dictionary<char, int> pieceLabelToValueMap = new Dictionary<char, int>()
-        {
-            { Pawn.GetLabel(Color.White), 1 },
-            { Knight.GetLabel(Color.White), 2 },
-            { Bishop.GetLabel(Color.White), 3 },
-            { Rook.GetLabel(Color.White), 4 },
-            { Queen.GetLabel(Color.White), 5 },
-            { King.GetLabel(Color.White), 6 },
-            { Pawn.GetLabel(Color.Black), 7 },
-            { Knight.GetLabel(Color.Black), 8 },
-            { Bishop.GetLabel(Color.Black), 9 },
-            { Rook.GetLabel(Color.Black), 10 },
-            { Queen.GetLabel(Color.Black), 11 },
-            { King.GetLabel(Color.Black), 12 }
-        };
-        private static readonly Dictionary<int, char> pieceValueToLabelMap = new Dictionary<int, char>()
-        {
-            { 1, Pawn.GetLabel(Color.White) },
-            { 2, Knight.GetLabel(Color.White) },
-            { 3, Bishop.GetLabel(Color.White) },
-            { 4, Rook.GetLabel(Color.White) },
-            { 5, Queen.GetLabel(Color.White) },
-            { 6, King.GetLabel(Color.White) },
-            { 7, Pawn.GetLabel(Color.Black) },
-            { 8, Knight.GetLabel(Color.Black) },
-            { 9, Bishop.GetLabel(Color.Black) },
-            { 10, Rook.GetLabel(Color.Black) },
-            { 11, Queen.GetLabel(Color.Black) },
-            { 12, King.GetLabel(Color.Black) }
-        };
 
         public static char GetLabel(Color color) { return '-'; }
-        public static Piece CreatePiece(Type pieceType, Color color, Square square)
+        public static int GetIndex(Color color) { return -1; }
+        private static Piece CreatePiece(Type pieceType, Color color, Square square)
         {
-            if (pieceType.Equals(typeof(Pawn)))
-            {
-                return new Pawn(color, square);
-            }
-            if (pieceType.Equals(typeof(Knight)))
-            {
-                return new Knight(color, square);
-            }
-            if (pieceType.Equals(typeof(Bishop)))
-            {
-                return new Bishop(color, square);
-            }
-            if (pieceType.Equals(typeof(Rook)))
-            {
-                return new Rook(color, square);
-            }
-            if (pieceType.Equals(typeof(King)))
-            {
-                return new King(color, square);
-            }
-            if (pieceType.Equals(typeof(Queen)))
-            {
-                return new Queen(color, square);
-            }
-            throw new IllegalArgumentException("Invalid PieceType provided.");
+            return (Piece)Activator.CreateInstance(pieceType, new object[] { color, square });
         }
-        public static Piece CreatePiece(char pieceLabel, Square square)
+        public static Piece CreatePiece(int pieceIndex, Square square)
         {
-            Type pieceType = GetTypeFromPieceLabel(pieceLabel);
-            Color color = GetColorFromPieceLabel(pieceLabel);
+            Type pieceType = GetTypeFromPieceIndex(pieceIndex);
+            Color color = GetColorFromPieceIndex(pieceIndex);
             return CreatePiece(pieceType, color, square);
         }
-        public static Color GetColorFromPieceLabel(char pieceLabel)
+        public static Color GetColorFromPieceIndex(int pieceIndex)
         {
-            if (char.IsUpper(pieceLabel)) return Color.White;
-            else return Color.Black;
+            if (pieceIndex >= 1 && pieceIndex <= 6) return Color.White;
+            else if (pieceIndex >= 7 && pieceIndex <= 12) return Color.Black;
+            throw new IllegalArgumentException("Illegal PieceIndex provided = " + pieceIndex);
         }
-        public static Type GetTypeFromPieceLabel(char pieceLabel)
+        public static Type GetTypeFromPieceIndex(int pieceIndex)
         {
-            switch (pieceLabel)
+            switch (pieceIndex)
             {
-                case 'p': case 'P': return typeof(Pawn);
-                case 'n': case 'N': return typeof(Knight);
-                case 'b': case 'B': return typeof(Bishop);
-                case 'r': case 'R': return typeof(Rook);
-                case 'k': case 'K': return typeof(King);
-                case 'q': case 'Q': return typeof(Queen);
+                case 1: case 7: return typeof(Pawn);
+                case 2: case 8: return typeof(Knight);
+                case 3: case 9: return typeof(Bishop);
+                case 4: case 10: return typeof(Rook);
+                case 5: case 11: return typeof(Queen);
+                case 6: case 12: return typeof(King);
                 default: throw new IllegalArgumentException();
             }
         }
-        public static int GetValueFromPieceLabel(char pieceLabel)
+        public static char GetLabelFromPieceIndex(int pieceIndex)
         {
-            return pieceLabelToValueMap[pieceLabel];
+            switch (pieceIndex)
+            {
+                case 1: return 'P';
+                case 2: return 'N';
+                case 3: return 'B';
+                case 4: return 'R';
+                case 5: return 'Q';
+                case 6: return 'K';
+                case 7: return 'p';
+                case 8: return 'n';
+                case 9: return 'b';
+                case 10: return 'r';
+                case 11: return 'q';
+                case 12: return 'k';
+                default: throw new IllegalArgumentException();
+            }
         }
-        public static char GetPieceLabelFromValue(int pieceValue)
+        public static int GetIndexFromPieceLabel(char pieceLabel)
         {
-            return pieceValueToLabelMap[pieceValue];
+            switch (pieceLabel)
+            {
+                case 'P': return 1;
+                case 'N': return 2;
+                case 'B': return 3;
+                case 'R': return 4;
+                case 'Q': return 5;
+                case 'K': return 6;
+                case 'p': return 7;
+                case 'n': return 8;
+                case 'b': return 9;
+                case 'r': return 10;
+                case 'q': return 11;
+                case 'k': return 12;
+                default: throw new IllegalArgumentException();
+            }
         }
     }
 }

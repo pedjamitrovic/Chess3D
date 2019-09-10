@@ -9,15 +9,26 @@
         {
 
         }
-        
+
+        public override char Label
+        {
+            get
+            {
+                return 'X';
+            }
+        }
+
+        public override int Index
+        {
+            get
+            {
+                return -1;
+            }
+        }
+
         private OffLimits() : base(Color.Both, Square.None, 0)
         {
 
-        }
-
-        public override char GetLabel()
-        {
-            return 'X';
         }
 
         public override bool IsBig()
@@ -38,6 +49,11 @@
         public static new char GetLabel(Color color)
         {
             return 'X';
+        }
+
+        public static new int GetIndex(Color color)
+        {
+            return -1;
         }
     }
 }

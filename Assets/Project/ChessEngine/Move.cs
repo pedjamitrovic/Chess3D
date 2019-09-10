@@ -49,69 +49,41 @@ namespace Assets.Project.ChessEngine
             }
         }
 
-        public char? CapturedPiece
+        public int? CapturedPiece
         {
             get
             {
-                try
-                {
-                    int key = (Value >> 14) & promotedPieceMask;
-                    return Piece.GetPieceLabelFromValue(key);
-                }
-                catch (Exception e) when (e is KeyNotFoundException || e is ArgumentNullException)
-                {
-                    return null;
-                }
+                int val = (Value >> 14) & capturedPieceMask;
+                if (val > 0) return val;
+                return null;
             }
             set
             {
                 if (value.HasValue)
                 {
-                    try
-                    {
-                        int val = Piece.GetValueFromPieceLabel(value.Value);
-                        Value &= (~(promotedPieceMask << 14));
-                        Value |= (val << 14);
-                    }
-                    catch (Exception e) when (e is KeyNotFoundException || e is ArgumentNullException)
-                    {
-                        throw new IllegalArgumentException("Invalid argument provided for CapturedPiece property.");
-                    }
+                    Value &= (~(capturedPieceMask << 14));
+                    Value |= (value.Value << 14);
                 }
                 else Value &= (~(capturedPieceMask << 14)); // set null
             }
         }
 
-        public char? PromotedPiece
+        public int? PromotedPiece
         {
             get
             {
-                try
-                {
-                    int key = (Value >> 20) & promotedPieceMask;
-                    return Piece.GetPieceLabelFromValue(key);
-                }
-                catch (Exception e) when (e is KeyNotFoundException || e is ArgumentNullException)
-                {
-                    return null;
-                }
+                int val = (Value >> 20) & promotedPieceMask;
+                if (val > 0) return val;
+                return null;
             }
             set
             {
                 if (value.HasValue)
                 {
-                    try
-                    {
-                        int val = Piece.GetValueFromPieceLabel(value.Value);
-                        Value &= (~(capturedPieceMask << 20));
-                        Value |= (val << 20);
-                    }
-                    catch(Exception e) when (e is KeyNotFoundException || e is ArgumentNullException)
-                    {
-                        throw new IllegalArgumentException("Invalid argument provided for PromotedPiece property.");
-                    }
+                    Value &= (~(promotedPieceMask << 20));
+                    Value |= (value.Value << 20);
                 }
-                else Value &= (~(capturedPieceMask << 20)); // set null
+                else Value &= (~(promotedPieceMask << 20)); // set null
             }
         }
 
@@ -184,8 +156,8 @@ namespace Assets.Project.ChessEngine
             hashCode = hashCode * -1521134295 + Score.GetHashCode();
             hashCode = hashCode * -1521134295 + FromSq.GetHashCode();
             hashCode = hashCode * -1521134295 + ToSq.GetHashCode();
-            hashCode = hashCode * -1521134295 + EqualityComparer<char?>.Default.GetHashCode(CapturedPiece);
-            hashCode = hashCode * -1521134295 + EqualityComparer<char?>.Default.GetHashCode(PromotedPiece);
+            hashCode = hashCode * -1521134295 + EqualityComparer<int?>.Default.GetHashCode(CapturedPiece);
+            hashCode = hashCode * -1521134295 + EqualityComparer<int?>.Default.GetHashCode(PromotedPiece);
             hashCode = hashCode * -1521134295 + IsEnPassant.GetHashCode();
             hashCode = hashCode * -1521134295 + IsPawnStart.GetHashCode();
             hashCode = hashCode * -1521134295 + IsCastle.GetHashCode();
@@ -200,7 +172,7 @@ namespace Assets.Project.ChessEngine
             sb.Append(fromSq + toSq);
             if (PromotedPiece.HasValue)
             {
-                sb.Append(char.ToLower(PromotedPiece.Value));
+                sb.Append(char.ToLower(Piece.GetLabelFromPieceIndex(PromotedPiece.Value)));
             }
             return sb.ToString();
         }

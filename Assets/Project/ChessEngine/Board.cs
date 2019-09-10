@@ -9,7 +9,9 @@ namespace Assets.Project.ChessEngine
 {
     public class Board
     {
-        #region PublicProperties
+        #region Properties
+        private PieceFactory pieceFactory;
+
         public Piece[] Pieces { get; set; } // 120 board rep
         public Bitboard[] Pawns { get; set; }
         public Square[] Kings { get; set; }
@@ -28,21 +30,23 @@ namespace Assets.Project.ChessEngine
         public LinkedList<UndoMove> History { get; set; } // list with data needed to undo past moves
         public PvTable PvTable { get; set; }
         public List<Move> PvMoves { get; set; }
-        public Dictionary<char, int[]> SearchHistory { get; set; }
+        public int[,] SearchHistory { get; set; }
         public int[,] SearchKillers { get; set; }
         #endregion
-        #region PublicMethods
+        #region Methods
         /* Default ctor. */
         public Board()
         {
-            Pieces = new Piece[BoardSquaresNumber];
-            for (int i = 0; i < BoardSquaresNumber; ++i) Pieces[i] = OffLimits.Instance;
+            pieceFactory = new PieceFactory();
+
+            Pieces = new Piece[Constants.BoardSquareCount];
+            for (int i = 0; i < Constants.BoardSquareCount; ++i) Pieces[i] = OffLimits.Instance;
             for (int i = 0; i < 64; ++i) Pieces[SqIndexes64To120[i]] = null;
 
-            Pawns = new Bitboard[PawnsRepresentationNumber];
-            for (int i = 0; i < PawnsRepresentationNumber; ++i) Pawns[i] = new Bitboard();
+            Pawns = new Bitboard[Constants.ColorWBB];
+            for (int i = 0; i < Constants.ColorWBB; ++i) Pawns[i] = new Bitboard();
 
-            Kings = new Square[KingsRepresentationNumber];
+            Kings = new Square[Constants.ColorWB];
             Kings[(int)Color.White] = Kings[(int)Color.Black] = Square.None;
 
             Material = new int[2];
@@ -67,26 +71,27 @@ namespace Assets.Project.ChessEngine
             Rank rank = Rank.Rank8;
             int i = 0;
 
-            Type pieceType = null;
-            Color color = Color.Both;
+            char? pieceLabel = null;
 
             for (; rank >= Rank.Rank1; ++i)
             {
                 count = 1;
                 switch (fen[i])
                 {
-                    case 'p': pieceType = typeof(Pawn); color = Color.Black; break;
-                    case 'n': pieceType = typeof(Knight); color = Color.Black; break;
-                    case 'b': pieceType = typeof(Bishop); color = Color.Black; break;
-                    case 'r': pieceType = typeof(Rook); color = Color.Black; break;
-                    case 'k': pieceType = typeof(King); color = Color.Black; break;
-                    case 'q': pieceType = typeof(Queen); color = Color.Black; break;
-                    case 'P': pieceType = typeof(Pawn); color = Color.White; break;
-                    case 'N': pieceType = typeof(Knight); color = Color.White; break;
-                    case 'B': pieceType = typeof(Bishop); color = Color.White; break;
-                    case 'R': pieceType = typeof(Rook); color = Color.White; break;
-                    case 'K': pieceType = typeof(King); color = Color.White; break;
-                    case 'Q': pieceType = typeof(Queen); color = Color.White; break;
+                    case 'p':
+                    case 'n':
+                    case 'b':
+                    case 'r':
+                    case 'k':
+                    case 'q':
+                    case 'P':
+                    case 'N':
+                    case 'B':
+                    case 'R':
+                    case 'K':
+                    case 'Q':
+                        pieceLabel = fen[i];
+                        break;
 
                     case '1':
                     case '2':
@@ -96,7 +101,7 @@ namespace Assets.Project.ChessEngine
                     case '6':
                     case '7':
                     case '8':
-                        pieceType = null;
+                        pieceLabel = null;
                         count = fen[i] - '0';
                         break;
 
@@ -115,9 +120,10 @@ namespace Assets.Project.ChessEngine
                 {
                     sq64 = (int)rank * 8 + (int)file;
                     sq120 = Sq120(sq64);
-                    if (pieceType != null)
+                    if (pieceLabel.HasValue)
                     {
-                        Pieces[sq120] = Piece.CreatePiece(pieceType, color, (Square)sq120);
+                        int pieceIndex = Piece.GetIndexFromPieceLabel(pieceLabel.Value);
+                        Pieces[sq120] = pieceFactory.CreatePiece(pieceIndex, (Square)sq120);
                     }
                     file++;
                 }
@@ -154,13 +160,12 @@ namespace Assets.Project.ChessEngine
         /* Updates tracked data of importance based on current board pieces. It should be called after any board state change is made. */
         public void UpdateListsAndMaterial()
         {
-            for (int i = 0; i < BoardSquaresNumber; ++i)
+            for (int i = 0; i < Constants.BoardSquareCount; ++i)
             {
                 Piece piece = Pieces[i];
                 if (piece != null && !(piece is OffLimits))
                 {
-                    PieceList.TryGetValue(piece.GetLabel(), out List<Piece> value);
-                    value.Add(piece);
+                    PieceList.AddPiece(piece);
                     piece.Square = (Square)i;
 
                     if (piece is King) Kings[(int)piece.Color] = (Square)i;
@@ -180,14 +185,13 @@ namespace Assets.Project.ChessEngine
             PieceList tempPieceList = new PieceList();
             int[] TempMaterial = new int[2];
 
-            foreach (var entry in PieceList)
+            for (int i = 1; i < Constants.PieceTypeCount; ++i)
             {
-                char pieceLabel = entry.Key;
-                foreach (Piece piece in entry.Value)
+                foreach(Piece piece in PieceList.GetList(i))
                 {
-                    if (!piece.GetLabel().Equals(pieceLabel)) throw new BoardIntegrityException();
+                    if (!piece.Index.Equals(i)) throw new BoardIntegrityException();
                     Piece tablePiece = Pieces[(int)piece.Square];
-                    if (!tablePiece.GetLabel().Equals(pieceLabel)) throw new BoardIntegrityException();
+                    if (!tablePiece.Index.Equals(i)) throw new BoardIntegrityException();
                     if (tablePiece.Color != piece.Color) throw new BoardIntegrityException();
                 }
             }
@@ -203,17 +207,16 @@ namespace Assets.Project.ChessEngine
                 TempMaterial[(int)piece.Color] += piece.Value;
             }
 
-            foreach (var entry in PieceList)
+            for (int i = 1; i < Constants.PieceTypeCount; ++i)
             {
-                char pieceLabel = entry.Key;
-                if (tempPieceList.GetPieceCount(pieceLabel) != entry.Value.Count) throw new BoardIntegrityException();
+                if (tempPieceList.GetPieceCount(i) != PieceList.GetPieceCount(i)) throw new BoardIntegrityException();
             }
 
-            if (Pawns[(int)Color.White].CountBit() != PieceList.GetPieceCount(Pawn.GetLabel(Color.White))
+            if (Pawns[(int)Color.White].CountBit() != PieceList.GetPieceCount(Pawn.GetIndex(Color.White))
                 ||
-                Pawns[(int)Color.Black].CountBit() != PieceList.GetPieceCount(Pawn.GetLabel(Color.Black))
+                Pawns[(int)Color.Black].CountBit() != PieceList.GetPieceCount(Pawn.GetIndex(Color.Black))
                 ||
-                Pawns[(int)Color.Both].CountBit() != (PieceList.GetPieceCount(Pawn.GetLabel(Color.White)) + PieceList.GetPieceCount(Pawn.GetLabel(Color.Black))))
+                Pawns[(int)Color.Both].CountBit() != (PieceList.GetPieceCount(Pawn.GetIndex(Color.White)) + PieceList.GetPieceCount(Pawn.GetIndex(Color.Black))))
             {
                 throw new BoardIntegrityException("Bitboard pawn count inequality");
             }
@@ -359,7 +362,7 @@ namespace Assets.Project.ChessEngine
                 {
                     square = ConvertToSq120(file, rank);
                     piece = Pieces[square];
-                    sb.Append(piece.GetLabel());
+                    sb.Append(piece.Label);
                 }
                 sb.Append(Environment.NewLine);
             }
@@ -385,15 +388,6 @@ namespace Assets.Project.ChessEngine
 
         #endregion
         #region StaticFields
-        public static readonly int BoardSquaresNumber = 120; // 120 square board representation style
-        public static readonly int PawnsRepresentationNumber = 3; // keeping track of white, black and both pawn positions in 64bit array
-        public static readonly int KingsRepresentationNumber = 2; // keeping track of both white and black king position
-        public static readonly int PieceTypesCount = 13; // keeping track of both white and black piece type count
-        public static readonly int BigPiecesRepresentationNumber = 3; // keeping track of both white and black piece count (excluding pawns)
-        public static readonly int MajorPiecesRepresentationNumber = 3; // keeping track of both white and black queens and rooks count
-        public static readonly int MinorPiecesRepresentationNumber = 3; // keeping track of both white and black knights and bishops count
-        public static readonly int MaxCountOfPieceType = 10; // 8 pawns can upgrade to same figure, plus max 2 same figures on board
-        
         private static readonly int[] SqIndexes120To64;
         private static readonly int[] SqIndexes64To120;
         private static readonly int[] FileBoard;
@@ -411,8 +405,8 @@ namespace Assets.Project.ChessEngine
             SqIndexes64To120 = new int[64];
             InitSqIndexes();
 
-            FileBoard = new int[BoardSquaresNumber];
-            RankBoard = new int[BoardSquaresNumber];
+            FileBoard = new int[Constants.BoardSquareCount];
+            RankBoard = new int[Constants.BoardSquareCount];
             InitFileRankBoards();
             InitHashGenerator();
         }
@@ -436,7 +430,7 @@ namespace Assets.Project.ChessEngine
 
         private static void InitFileRankBoards()
         {
-            for (int i = 0; i < BoardSquaresNumber; ++i)
+            for (int i = 0; i < Constants.BoardSquareCount; ++i)
             {
                 FileBoard[i] = (int)Square.None;
                 RankBoard[i] = (int)Square.None;
@@ -455,31 +449,18 @@ namespace Assets.Project.ChessEngine
 
         private static void InitHashGenerator()
         {
-            pieceKeys = new Dictionary<char, ulong[]>();
-            #region PieceKeysInit
-            pieceKeys.Add(Pawn.GetLabel(Color.White), new ulong[BoardSquaresNumber]);
-            pieceKeys.Add(Knight.GetLabel(Color.White), new ulong[BoardSquaresNumber]);
-            pieceKeys.Add(Bishop.GetLabel(Color.White), new ulong[BoardSquaresNumber]);
-            pieceKeys.Add(Rook.GetLabel(Color.White), new ulong[BoardSquaresNumber]);
-            pieceKeys.Add(Queen.GetLabel(Color.White), new ulong[BoardSquaresNumber]);
-            pieceKeys.Add(King.GetLabel(Color.White), new ulong[BoardSquaresNumber]);
-            pieceKeys.Add(Pawn.GetLabel(Color.Black), new ulong[BoardSquaresNumber]);
-            pieceKeys.Add(Knight.GetLabel(Color.Black), new ulong[BoardSquaresNumber]);
-            pieceKeys.Add(Bishop.GetLabel(Color.Black), new ulong[BoardSquaresNumber]);
-            pieceKeys.Add(Rook.GetLabel(Color.Black), new ulong[BoardSquaresNumber]);
-            pieceKeys.Add(Queen.GetLabel(Color.Black), new ulong[BoardSquaresNumber]);
-            pieceKeys.Add(King.GetLabel(Color.Black), new ulong[BoardSquaresNumber]);
-            pieceKeys.Add('E', new ulong[BoardSquaresNumber]); // en passant
-            #endregion
-            foreach (var entry in pieceKeys)
+            pieceKeys = new ulong[Constants.PieceTypeCount, Constants.BoardSquareCount];
+            for (int i = 0; i < Constants.PieceTypeCount; ++i) // 0 index for en passant
             {
-                for (int i = 0; i < BoardSquaresNumber; ++i)
+                for (int j = 0; j < Constants.BoardSquareCount; ++j)
                 {
-                    entry.Value[i] = Get64BitRandom();
+                    pieceKeys[i, j] = Get64BitRandom();
                 }
             }
+
             sideKey = Get64BitRandom();
             castleKeys = new ulong[16];
+
             for (int i = 0; i < 16; ++i)
             {
                 castleKeys[i] = Get64BitRandom();
@@ -507,7 +488,7 @@ namespace Assets.Project.ChessEngine
         }
         #endregion
         #region HashGenerator
-        private static Dictionary<char, ulong[]> pieceKeys; // 13x120
+        private static ulong[,] pieceKeys; // 13x120
         private static ulong sideKey;
         private static ulong[] castleKeys; // 16 (4 bit representation 0-15 values)
         private static Random rnd = new Random();
@@ -517,23 +498,20 @@ namespace Assets.Project.ChessEngine
             ulong finalKey = 0;
             Piece piece;
 
-            for (int sq = 0; sq < BoardSquaresNumber; ++sq)
+            for (int sq = 0; sq < Constants.BoardSquareCount; ++sq)
             {
                 piece = Pieces[sq];
                 if (piece != null && !(piece is OffLimits))
                 {
-                    if (pieceKeys.TryGetValue(piece.GetLabel(), out ulong[] val))
-                    {
-                        finalKey ^= val[sq];
-                    }
+                    finalKey ^= pieceKeys[piece.Index, sq];
                 }
             }
 
             if (OnTurn == Color.White) finalKey ^= sideKey;
 
-            if (EnPassant != Square.None && pieceKeys.TryGetValue('E', out ulong[] value))
+            if (EnPassant != Square.None)
             {
-                finalKey ^= value[(int)EnPassant];
+                finalKey ^= pieceKeys[0, (int)EnPassant]; // 0 index for en passant
             }
 
             finalKey ^= castleKeys[CastlePerm];
@@ -543,11 +521,7 @@ namespace Assets.Project.ChessEngine
 
         private void HashPiece(Piece piece, Square square)
         {
-            if (pieceKeys.TryGetValue(piece.GetLabel(), out ulong[] value))
-            {
-                StateKey ^= value[(int)square];
-            }
-            else throw new IllegalArgumentException();
+            StateKey ^= pieceKeys[piece.Index, (int)square];
         }
 
         private void HashCastle()
@@ -562,11 +536,7 @@ namespace Assets.Project.ChessEngine
 
         private void HashEnPassant()
         {
-            if (pieceKeys.TryGetValue('E', out ulong[] value))
-            {
-                StateKey ^= value[(int)EnPassant];
-            }
-            else throw new IllegalArgumentException();
+            StateKey ^= pieceKeys[0, (int)EnPassant];
         }
 
         private static ulong Get64BitRandom(ulong minValue = ulong.MinValue, ulong maxValue = ulong.MaxValue)
@@ -580,15 +550,15 @@ namespace Assets.Project.ChessEngine
         #region MoveGenerator
         private static readonly int[] StartLoopSlideIndex = { 0, 4 };
         private static readonly int[] StartLoopNonSlideIndex = { 0, 3 };
-        private static readonly char?[] LoopSlidePieces =
+        private static readonly int?[] LoopSlidePieces =
         {
-            Bishop.GetLabel(Color.White), Rook.GetLabel(Color.White), Queen.GetLabel(Color.White), null,
-            Bishop.GetLabel(Color.Black), Rook.GetLabel(Color.Black), Queen.GetLabel(Color.Black), null,
+            Bishop.GetIndex(Color.White), Rook.GetIndex(Color.White), Queen.GetIndex(Color.White), null,
+            Bishop.GetIndex(Color.Black), Rook.GetIndex(Color.Black), Queen.GetIndex(Color.Black), null,
         };
-        private static readonly char?[] LoopNonSlidePieces =
+        private static readonly int?[] LoopNonSlidePieces =
         {
-            Knight.GetLabel(Color.White), King.GetLabel(Color.White), null,
-            Knight.GetLabel(Color.Black), King.GetLabel(Color.Black), null,
+            Knight.GetIndex(Color.White), King.GetIndex(Color.White), null,
+            Knight.GetIndex(Color.Black), King.GetIndex(Color.Black), null,
         };
         private static readonly int[,] PieceDirection = {
             { -9, -11, 11, 9, 0, 0, 0, 0, 0 },
@@ -608,7 +578,7 @@ namespace Assets.Project.ChessEngine
             #region Pawns
             if (OnTurn == Color.White)
             {
-                foreach (Piece pawn in PieceList.GetList(Pawn.GetLabel(Color.White)))
+                foreach (Piece pawn in PieceList.GetList(Pawn.GetIndex(Color.White)))
                 {
                     Square square = pawn.Square;
 
@@ -629,11 +599,11 @@ namespace Assets.Project.ChessEngine
 
                     if (Pieces[(int)square + 9]?.Color == Color.Black)
                     {
-                        moveList.AddPawnCaptureMove(OnTurn, square, square + 9, Pieces[(int)square + 9].GetLabel());
+                        moveList.AddPawnCaptureMove(OnTurn, square, square + 9, Pieces[(int)square + 9].Index);
                     }
                     if (Pieces[(int)square + 11]?.Color == Color.Black)
                     {
-                        moveList.AddPawnCaptureMove(OnTurn, square, square + 11, Pieces[(int)square + 11].GetLabel());
+                        moveList.AddPawnCaptureMove(OnTurn, square, square + 11, Pieces[(int)square + 11].Index);
                     }
 
                     if (EnPassant != Square.None)
@@ -697,7 +667,7 @@ namespace Assets.Project.ChessEngine
             }
             else
             {
-                foreach (Piece pawn in PieceList.GetList(Pawn.GetLabel(Color.Black)))
+                foreach (Piece pawn in PieceList.GetList(Pawn.GetIndex(Color.Black)))
                 {
                     Square square = pawn.Square;
 
@@ -718,11 +688,11 @@ namespace Assets.Project.ChessEngine
 
                     if (Pieces[(int)square - 9]?.Color == Color.White)
                     {
-                        moveList.AddPawnCaptureMove(OnTurn, square, square - 9, Pieces[(int)square - 9].GetLabel());
+                        moveList.AddPawnCaptureMove(OnTurn, square, square - 9, Pieces[(int)square - 9].Index);
                     }
                     if (Pieces[(int)square - 11]?.Color == Color.White)
                     {
-                        moveList.AddPawnCaptureMove(OnTurn, square, square - 11, Pieces[(int)square - 11].GetLabel());
+                        moveList.AddPawnCaptureMove(OnTurn, square, square - 11, Pieces[(int)square - 11].Index);
                     }
 
                     if (EnPassant != Square.None)
@@ -788,10 +758,10 @@ namespace Assets.Project.ChessEngine
 
             #region Slide
             int pieceIndex = StartLoopSlideIndex[(int)OnTurn];
-            char? pieceLabel = LoopSlidePieces[pieceIndex++];
-            while (pieceLabel.HasValue)
+            int? pieceListIndex = LoopSlidePieces[pieceIndex++];
+            while (pieceListIndex.HasValue)
             {
-                foreach (Piece currentPiece in PieceList.GetList(pieceLabel.Value))
+                foreach (Piece currentPiece in PieceList.GetList(pieceListIndex.Value))
                 {
                     Square square = currentPiece.Square;
 
@@ -812,7 +782,7 @@ namespace Assets.Project.ChessEngine
                                     {
                                         FromSq = square,
                                         ToSq = tempSq,
-                                        CapturedPiece = piece.GetLabel()
+                                        CapturedPiece = piece.Index
                                     };
                                     moveList.AddCaptureMove(move);
                                 }
@@ -830,17 +800,17 @@ namespace Assets.Project.ChessEngine
                         direction = PieceDirection[pieceIndex - 1 - StartLoopSlideIndex[(int)OnTurn], index++];
                     }
                 }
-                pieceLabel = LoopSlidePieces[pieceIndex++];
+                pieceListIndex = LoopSlidePieces[pieceIndex++];
             }
             #endregion
 
             #region NonSlide
             pieceIndex = StartLoopNonSlideIndex[(int)OnTurn];
-            pieceLabel = LoopNonSlidePieces[pieceIndex++];
+            pieceListIndex = LoopNonSlidePieces[pieceIndex++];
 
-            while (pieceLabel.HasValue)
+            while (pieceListIndex.HasValue)
             {
-                foreach (Piece currentPiece in PieceList.GetList(pieceLabel.Value))
+                foreach (Piece currentPiece in PieceList.GetList(pieceListIndex.Value))
                 {
                     Square square = currentPiece.Square;
 
@@ -865,7 +835,7 @@ namespace Assets.Project.ChessEngine
                                 {
                                     FromSq = square,
                                     ToSq = tempSq,
-                                    CapturedPiece = piece.GetLabel()
+                                    CapturedPiece = piece.Index
                                 };
                                 moveList.AddCaptureMove(move);
                             }
@@ -881,7 +851,7 @@ namespace Assets.Project.ChessEngine
                         direction = PieceDirection[pieceIndex + 2 - StartLoopNonSlideIndex[(int)OnTurn], index++];
                     }
                 }
-                pieceLabel = LoopNonSlidePieces[pieceIndex++];
+                pieceListIndex = LoopNonSlidePieces[pieceIndex++];
             }
             #endregion
 
@@ -904,27 +874,9 @@ namespace Assets.Project.ChessEngine
             15, 15, 15, 15, 15, 15, 15, 15, 15, 15
         };
 
-        private void AddPiece(Type pieceType, Color color, Square square)
+        private void AddPiece(int pieceIndex, Square square)
         {
-            Piece piece = Piece.CreatePiece(pieceType, color, square);
-
-            HashPiece(piece, square);
-
-            Pieces[(int)square] = piece;
-            PieceList.AddPiece(piece);
-
-            if (piece is Pawn)
-            {
-                Pawns[(int)piece.Color].SetBit(square);
-                Pawns[(int)Color.Both].SetBit(square);
-            }
-
-            Material[(int)piece.Color] += piece.Value;
-        }
-
-        private void AddPiece(char pieceLabel, Square square)
-        {
-            Piece piece = Piece.CreatePiece(pieceLabel, square);
+            Piece piece = pieceFactory.CreatePiece(pieceIndex, square);
 
             HashPiece(piece, square);
 
@@ -948,6 +900,7 @@ namespace Assets.Project.ChessEngine
 
             Pieces[(int)square] = null;
             PieceList.RemovePiece(piece);
+            pieceFactory.DeletePiece(piece);
 
             if (piece is Pawn)
             {
@@ -1113,11 +1066,11 @@ namespace Assets.Project.ChessEngine
             {
                 if (OnTurn == (int)Color.White)
                 {
-                    AddPiece(typeof(Pawn), Color.Black, undoMoveData.Move.ToSq - 10);
+                    AddPiece(Pawn.GetIndex(Color.Black), undoMoveData.Move.ToSq - 10);
                 }
                 else
                 {
-                    AddPiece(typeof(Pawn), Color.White, undoMoveData.Move.ToSq + 10);
+                    AddPiece(Pawn.GetIndex(Color.White), undoMoveData.Move.ToSq + 10);
                 }
             }
             else if (undoMoveData.Move.IsCastle)
@@ -1155,8 +1108,8 @@ namespace Assets.Project.ChessEngine
             if (undoMoveData.Move.PromotedPiece.HasValue)
             {
                 RemovePiece(undoMoveData.Move.FromSq);
-                Color color = Piece.GetColorFromPieceLabel(undoMoveData.Move.PromotedPiece.Value);
-                AddPiece(typeof(Pawn), color, undoMoveData.Move.FromSq);
+                Color color = Piece.GetColorFromPieceIndex(undoMoveData.Move.PromotedPiece.Value);
+                AddPiece(Pawn.GetIndex(color), undoMoveData.Move.FromSq);
             }
 
             //CheckIntegrity();
@@ -1279,59 +1232,59 @@ namespace Assets.Project.ChessEngine
         {
             int score = Material[(int)Color.White] - Material[(int)Color.Black];
 
-            char pieceLabel;
+            int pieceIndex;
 
             //pawns
-            pieceLabel = Pawn.GetLabel(Color.White);
-            foreach (Piece piece in PieceList.GetList(pieceLabel))
+            pieceIndex = Pawn.GetIndex(Color.White);
+            foreach (Piece piece in PieceList.GetList(pieceIndex))
             {
                 Square square = piece.Square;
                 score += PawnPositionValue[Sq64((int)square)];
             }
-            pieceLabel = Pawn.GetLabel(Color.Black);
-            foreach (Piece piece in PieceList.GetList(pieceLabel))
+            pieceIndex = Pawn.GetIndex(Color.Black);
+            foreach (Piece piece in PieceList.GetList(pieceIndex))
             {
                 Square square = piece.Square;
                 score -= PawnPositionValue[Mirror(Sq64((int)square))];
             }
 
             //knights
-            pieceLabel = Knight.GetLabel(Color.White);
-            foreach (Piece piece in PieceList.GetList(pieceLabel))
+            pieceIndex = Knight.GetIndex(Color.White);
+            foreach (Piece piece in PieceList.GetList(pieceIndex))
             {
                 Square square = piece.Square;
                 score += KnightPositionValue[Sq64((int)square)];
             }
-            pieceLabel = Knight.GetLabel(Color.Black);
-            foreach (Piece piece in PieceList.GetList(pieceLabel))
+            pieceIndex = Knight.GetIndex(Color.Black);
+            foreach (Piece piece in PieceList.GetList(pieceIndex))
             {
                 Square square = piece.Square;
                 score -= KnightPositionValue[Mirror(Sq64((int)square))];
             }
 
             //bishops
-            pieceLabel = Bishop.GetLabel(Color.White);
-            foreach (Piece piece in PieceList.GetList(pieceLabel))
+            pieceIndex = Bishop.GetIndex(Color.White);
+            foreach (Piece piece in PieceList.GetList(pieceIndex))
             {
                 Square square = piece.Square;
                 score += BishopPositionValue[Sq64((int)square)];
             }
-            pieceLabel = Bishop.GetLabel(Color.Black);
-            foreach (Piece piece in PieceList.GetList(pieceLabel))
+            pieceIndex = Bishop.GetIndex(Color.Black);
+            foreach (Piece piece in PieceList.GetList(pieceIndex))
             {
                 Square square = piece.Square;
                 score -= BishopPositionValue[Mirror(Sq64((int)square))];
             }
 
             //rooks
-            pieceLabel = Rook.GetLabel(Color.White);
-            foreach (Piece piece in PieceList.GetList(pieceLabel))
+            pieceIndex = Rook.GetIndex(Color.White);
+            foreach (Piece piece in PieceList.GetList(pieceIndex))
             {
                 Square square = piece.Square;
                 score += PawnPositionValue[Sq64((int)square)];
             }
-            pieceLabel = Rook.GetLabel(Color.Black);
-            foreach (Piece piece in PieceList.GetList(pieceLabel))
+            pieceIndex = Rook.GetIndex(Color.Black);
+            foreach (Piece piece in PieceList.GetList(pieceIndex))
             {
                 Square square = piece.Square;
                 score -= PawnPositionValue[Mirror(Sq64((int)square))];
@@ -1358,21 +1311,7 @@ namespace Assets.Project.ChessEngine
         }
         private void PrepareForSearch()
         {
-            SearchHistory = new Dictionary<char, int[]>()
-            {
-                { Pawn.GetLabel(Color.White), new int[BoardSquaresNumber] },
-                { Knight.GetLabel(Color.White), new int[BoardSquaresNumber] },
-                { Bishop.GetLabel(Color.White), new int[BoardSquaresNumber] },
-                { Rook.GetLabel(Color.White), new int[BoardSquaresNumber] },
-                { Queen.GetLabel(Color.White), new int[BoardSquaresNumber] },
-                { King.GetLabel(Color.White), new int[BoardSquaresNumber] },
-                { Pawn.GetLabel(Color.Black), new int[BoardSquaresNumber] },
-                { Knight.GetLabel(Color.Black), new int[BoardSquaresNumber] },
-                { Bishop.GetLabel(Color.Black), new int[BoardSquaresNumber] },
-                { Rook.GetLabel(Color.Black), new int[BoardSquaresNumber] },
-                { Queen.GetLabel(Color.Black), new int[BoardSquaresNumber] },
-                { King.GetLabel(Color.Black), new int[BoardSquaresNumber] }
-            };
+            SearchHistory = new int[Constants.PieceTypeCount, Constants.BoardSquareCount];
             SearchKillers = new int[2, Constants.MaxSearchDepth];
             PvTable = new PvTable();
             Ply = 0;
@@ -1386,7 +1325,7 @@ namespace Assets.Project.ChessEngine
 
             StringBuilder sb = new StringBuilder();
 
-            for(int currentDepth = 1; currentDepth <= info.DepthLimit; ++currentDepth) // iterative deepening
+            for (int currentDepth = 1; currentDepth <= info.DepthLimit; ++currentDepth) // iterative deepening
             {
                 bestScore = AlphaBeta(-Constants.Infinity, Constants.Infinity, currentDepth, info, true);
                 GetPvLine(currentDepth);
@@ -1394,7 +1333,7 @@ namespace Assets.Project.ChessEngine
 
                 sb.AppendFormat("Depth: {0} Score: {1} Move: {2}, NodesVisited: {3} ", currentDepth, bestScore, bestMove, info.NodesVisited);
                 sb.Append("Pv:");
-                foreach(Move move in PvMoves)
+                foreach (Move move in PvMoves)
                 {
                     sb.AppendFormat(" {0}", move);
                 }
@@ -1418,7 +1357,7 @@ namespace Assets.Project.ChessEngine
             Move bestMove = null;
             int score = -Constants.Infinity;
 
-            foreach(Move move in GenerateAllMoves())
+            foreach (Move move in GenerateAllMoves())
             {
                 if (!DoMove(move)) continue;
 

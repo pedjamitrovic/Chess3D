@@ -235,6 +235,7 @@
     <Compile Include="Assets\Project\ChessEngine\Perft.cs" />
     <Compile Include="Assets\Project\ChessEngine\Pieces\OffBoard.cs" />
     <Compile Include="Assets\Project\ChessEngine\PieceList.cs" />
+    <Compile Include="Assets\Project\ChessEngine\Pieces\PieceFactory.cs" />
     <Compile Include="Assets\Project\ChessEngine\PvTable.cs" />
     <Compile Include="Assets\Project\ChessEngine\SearchInfo.cs" />
     <Compile Include="Assets\Project\ChessEngine\UndoMove.cs" />

@@ -2,15 +2,27 @@
 {
     public class Pawn : Piece
     {
+        public override char Label
+        {
+            get
+            {
+                if (Color == Color.White) return 'P';
+                else return 'p';
+            }
+        }
+
+        public override int Index
+        {
+            get
+            {
+                if (Color == Color.White) return 1;
+                else return 7;
+            }
+        }
+
         public Pawn(Color color, Square square) : base(color, square, 100)
         {
 
-        }
-
-        public override char GetLabel()
-        {
-            if (Color == Color.White) return 'P';
-            else return 'p';
         }
         
         public override bool IsBig()
@@ -32,6 +44,12 @@
         {
             if (color == Color.White) return 'P';
             else return 'p';
+        }
+
+        public new static int GetIndex(Color color)
+        {
+            if (color == Color.White) return 1;
+            else return 7;
         }
     }
 }

@@ -2,15 +2,27 @@
 {
     public class Rook : Piece
     {
+        public override char Label
+        {
+            get
+            {
+                if (Color == Color.White) return 'R';
+                else return 'r';
+            }
+        }
+
+        public override int Index
+        {
+            get
+            {
+                if (Color == Color.White) return 4;
+                else return 10;
+            }
+        }
+
         public Rook(Color color, Square square) : base(color, square, 550)
         {
 
-        }
-
-        public override char GetLabel()
-        {
-            if (Color == Color.White) return 'R';
-            else return 'r';
         }
 
         public override bool IsBig()
@@ -32,6 +44,12 @@
         {
             if (color == Color.White) return 'R';
             else return 'r';
+        }
+
+        public new static int GetIndex(Color color)
+        {
+            if (color == Color.White) return 4;
+            else return 10;
         }
     }
 }

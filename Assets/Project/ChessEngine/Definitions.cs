@@ -18,6 +18,12 @@
     public enum Hf { None, Alpha, Beta, Exact };
     public static class Constants
     {
+        public static readonly int BoardSquareCount = 120; // 120 square board representation style
+        public static readonly int ColorWBB = 3; // keeping track of white, black and both
+        public static readonly int ColorWB = 2; // keeping track of both white and black
+        public static readonly int PieceTypeCount = 13; // 1..12 PieceType (6*W, 6*B)
+        public static readonly int MaxSamePieceCount = 10; // 8 pawns can upgrade to same figure, plus max 2 same figures on board
+
         public static readonly int Infinity = 100000;
         public static readonly int MaxSearchDepth = 16;
         public static readonly int IsMate = Infinity - MaxSearchDepth;

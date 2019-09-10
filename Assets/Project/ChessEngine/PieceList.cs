@@ -6,54 +6,45 @@ using System.Text;
 
 namespace Assets.Project.ChessEngine.Pieces
 {
-    public class PieceList : Dictionary<char, List<Piece>>
+    public class PieceList 
     {
+        private readonly int[] pieceCount;
+        private readonly Piece[,] pieceList;
+
         public PieceList()
         {
-            Add(Pawn.GetLabel(Color.White), new List<Piece>());
-            Add(Knight.GetLabel(Color.White), new List<Piece>());
-            Add(Bishop.GetLabel(Color.White), new List<Piece>());
-            Add(Rook.GetLabel(Color.White), new List<Piece>());
-            Add(Queen.GetLabel(Color.White), new List<Piece>());
-            Add(King.GetLabel(Color.White), new List<Piece>());
-            Add(Pawn.GetLabel(Color.Black), new List<Piece>());
-            Add(Knight.GetLabel(Color.Black), new List<Piece>());
-            Add(Bishop.GetLabel(Color.Black), new List<Piece>());
-            Add(Rook.GetLabel(Color.Black), new List<Piece>());
-            Add(Queen.GetLabel(Color.Black), new List<Piece>());
-            Add(King.GetLabel(Color.Black), new List<Piece>());
+            pieceCount = new int[Constants.PieceTypeCount];
+            pieceList = new Piece[Constants.PieceTypeCount, Constants.MaxSamePieceCount];
         }
-        public List<Piece> GetList(char pieceLabel)
+        public IEnumerable<Piece> GetList(int pieceIndex)
         {
-            if (TryGetValue(pieceLabel, out var list))
+            for (int i = 0; i < pieceCount[pieceIndex]; ++i)
             {
-                return list;
+                yield return pieceList[pieceIndex, i];
             }
-            else throw new IllegalArgumentException();
         }
         public void AddPiece(Piece piece)
         {
-            if (TryGetValue(piece.GetLabel(), out var list))
-            {
-                list.Add(piece);
-            }
-            else throw new IllegalArgumentException();
+            pieceList[piece.Index, pieceCount[piece.Index]++] = piece;
         }
         public void RemovePiece(Piece piece)
         {
-            if (TryGetValue(piece.GetLabel(), out var list))
+            int indexOfRemovedPiece = -1;
+            for (int i = 0; i < pieceCount[piece.Index]; ++i)
             {
-                list.Remove(piece);
+                if (pieceList[piece.Index, i] == piece)
+                {
+                    indexOfRemovedPiece = i;
+                    break;
+                }
             }
-            else throw new IllegalArgumentException();
+
+            --pieceCount[piece.Index];
+            pieceList[piece.Index, indexOfRemovedPiece] = pieceList[piece.Index, pieceCount[piece.Index]];
         }
-        public int GetPieceCount(char pieceLabel)
+        public int GetPieceCount(int pieceIndex)
         {
-            if (TryGetValue(pieceLabel, out var list))
-            {
-                return list.Count;
-            }
-            else throw new IllegalArgumentException();
+            return pieceCount[pieceIndex];
         }
     }
 }
