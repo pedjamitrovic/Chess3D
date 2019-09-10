@@ -13,44 +13,46 @@ namespace Assets.Project.ChessEngine
             move.Score = 0;
             Add(move);
         }
-        public void AddCaptureMove(Move move)
+        public void AddCaptureMove(Board board, Move move)
         {
-            move.Score = 0;
+            int vic = move.CapturedPiece.Value;
+            int att = board.Pieces[(int)move.FromSq].Index;
+            move.Score = Board.MvvLvaScores[vic, att];
             Add(move);
         }
         public void AddEnPassantMove(Move move)
         {
-            move.Score = 0;
+            move.Score = 105;
             Add(move);
         }
-        public void AddPawnCaptureMove(Color onTurn, Square fromSq, Square toSq, int capturedPiece)
+        public void AddPawnCaptureMove(Board board, Color onTurn, Square fromSq, Square toSq, int capturedPiece)
         {
             if (onTurn == Color.White)
             {
                 if (Board.GetRank(fromSq) == Rank.Rank7)
                 {
-                    AddCaptureMove(new Move
+                    AddCaptureMove(board, new Move
                     {
                         FromSq = fromSq,
                         ToSq = toSq,
                         CapturedPiece = capturedPiece,
                         PromotedPiece = Queen.GetIndex(Color.White)
                     });
-                    AddCaptureMove(new Move
+                    AddCaptureMove(board, new Move
                     {
                         FromSq = fromSq,
                         ToSq = toSq,
                         CapturedPiece = capturedPiece,
                         PromotedPiece = Rook.GetIndex(Color.White)
                     });
-                    AddCaptureMove(new Move
+                    AddCaptureMove(board, new Move
                     {
                         FromSq = fromSq,
                         ToSq = toSq,
                         CapturedPiece = capturedPiece,
                         PromotedPiece = Bishop.GetIndex(Color.White)
                     });
-                    AddCaptureMove(new Move
+                    AddCaptureMove(board, new Move
                     {
                         FromSq = fromSq,
                         ToSq = toSq,
@@ -60,7 +62,7 @@ namespace Assets.Project.ChessEngine
                 }
                 else
                 {
-                    AddCaptureMove(new Move
+                    AddCaptureMove(board, new Move
                     {
                         FromSq = fromSq,
                         ToSq = toSq,
@@ -72,28 +74,28 @@ namespace Assets.Project.ChessEngine
             {
                 if (Board.GetRank(fromSq) == Rank.Rank2)
                 {
-                    AddCaptureMove(new Move
+                    AddCaptureMove(board, new Move
                     {
                         FromSq = fromSq,
                         ToSq = toSq,
                         CapturedPiece = capturedPiece,
                         PromotedPiece = Queen.GetIndex(Color.Black)
                     });
-                    AddCaptureMove(new Move
+                    AddCaptureMove(board, new Move
                     {
                         FromSq = fromSq,
                         ToSq = toSq,
                         CapturedPiece = capturedPiece,
                         PromotedPiece = Rook.GetIndex(Color.Black)
                     });
-                    AddCaptureMove(new Move
+                    AddCaptureMove(board, new Move
                     {
                         FromSq = fromSq,
                         ToSq = toSq,
                         CapturedPiece = capturedPiece,
                         PromotedPiece = Bishop.GetIndex(Color.Black)
                     });
-                    AddCaptureMove(new Move
+                    AddCaptureMove(board, new Move
                     {
                         FromSq = fromSq,
                         ToSq = toSq,
@@ -103,7 +105,7 @@ namespace Assets.Project.ChessEngine
                 }
                 else
                 {
-                    AddCaptureMove(new Move
+                    AddCaptureMove(board, new Move
                     {
                         FromSq = fromSq,
                         ToSq = toSq,

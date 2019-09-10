@@ -11,7 +11,6 @@ namespace Assets.Project.ChessEngine
     {
         #region Properties
         private PieceFactory pieceFactory;
-
         public Piece[] Pieces { get; set; } // 120 board rep
         public Bitboard[] Pawns { get; set; }
         public Square[] Kings { get; set; }
@@ -187,7 +186,7 @@ namespace Assets.Project.ChessEngine
 
             for (int i = 1; i < Constants.PieceTypeCount; ++i)
             {
-                foreach(Piece piece in PieceList.GetList(i))
+                foreach (Piece piece in PieceList.GetList(i))
                 {
                     if (!piece.Index.Equals(i)) throw new BoardIntegrityException();
                     Piece tablePiece = Pieces[(int)piece.Square];
@@ -387,7 +386,7 @@ namespace Assets.Project.ChessEngine
         }
 
         #endregion
-        #region StaticFields
+        #region Static
         private static readonly int[] SqIndexes120To64;
         private static readonly int[] SqIndexes64To120;
         private static readonly int[] FileBoard;
@@ -397,8 +396,7 @@ namespace Assets.Project.ChessEngine
         public static readonly int[] RkDirection = { -1, -10, 1, 10 };
         public static readonly int[] BiDirection = { -9, -11, 11, 9 };
         public static readonly int[] KiDirection = { -1, -10, 1, 10, -9, -11, 11, 9 };
-        #endregion
-        #region StaticMethods
+
         static Board()
         {
             SqIndexes120To64 = new int[120];
@@ -409,6 +407,7 @@ namespace Assets.Project.ChessEngine
             RankBoard = new int[Constants.BoardSquareCount];
             InitFileRankBoards();
             InitHashGenerator();
+            InitMvvLva();
         }
 
         private static void InitSqIndexes()
@@ -447,26 +446,6 @@ namespace Assets.Project.ChessEngine
             }
         }
 
-        private static void InitHashGenerator()
-        {
-            pieceKeys = new ulong[Constants.PieceTypeCount, Constants.BoardSquareCount];
-            for (int i = 0; i < Constants.PieceTypeCount; ++i) // 0 index for en passant
-            {
-                for (int j = 0; j < Constants.BoardSquareCount; ++j)
-                {
-                    pieceKeys[i, j] = Get64BitRandom();
-                }
-            }
-
-            sideKey = Get64BitRandom();
-            castleKeys = new ulong[16];
-
-            for (int i = 0; i < 16; ++i)
-            {
-                castleKeys[i] = Get64BitRandom();
-            }
-        }
-
         public static int ConvertToSq120(File f, Rank r)
         {
             return ((int)r * 10 + (int)f + 21);
@@ -493,6 +472,25 @@ namespace Assets.Project.ChessEngine
         private static ulong[] castleKeys; // 16 (4 bit representation 0-15 values)
         private static Random rnd = new Random();
 
+        private static void InitHashGenerator()
+        {
+            pieceKeys = new ulong[Constants.PieceTypeCount, Constants.BoardSquareCount];
+            for (int i = 0; i < Constants.PieceTypeCount; ++i) // 0 index for en passant
+            {
+                for (int j = 0; j < Constants.BoardSquareCount; ++j)
+                {
+                    pieceKeys[i, j] = Get64BitRandom();
+                }
+            }
+
+            sideKey = Get64BitRandom();
+            castleKeys = new ulong[16];
+
+            for (int i = 0; i < 16; ++i)
+            {
+                castleKeys[i] = Get64BitRandom();
+            }
+        }
         public ulong CalculateStateKey()
         {
             ulong finalKey = 0;
@@ -518,27 +516,22 @@ namespace Assets.Project.ChessEngine
 
             return finalKey;
         }
-
         private void HashPiece(Piece piece, Square square)
         {
             StateKey ^= pieceKeys[piece.Index, (int)square];
         }
-
         private void HashCastle()
         {
             StateKey ^= castleKeys[CastlePerm];
         }
-
         private void HashSide()
         {
             StateKey ^= sideKey;
         }
-
         private void HashEnPassant()
         {
             StateKey ^= pieceKeys[0, (int)EnPassant];
         }
-
         private static ulong Get64BitRandom(ulong minValue = ulong.MinValue, ulong maxValue = ulong.MaxValue)
         {
             byte[] buf = new byte[8];
@@ -599,11 +592,11 @@ namespace Assets.Project.ChessEngine
 
                     if (Pieces[(int)square + 9]?.Color == Color.Black)
                     {
-                        moveList.AddPawnCaptureMove(OnTurn, square, square + 9, Pieces[(int)square + 9].Index);
+                        moveList.AddPawnCaptureMove(this, OnTurn, square, square + 9, Pieces[(int)square + 9].Index);
                     }
                     if (Pieces[(int)square + 11]?.Color == Color.Black)
                     {
-                        moveList.AddPawnCaptureMove(OnTurn, square, square + 11, Pieces[(int)square + 11].Index);
+                        moveList.AddPawnCaptureMove(this, OnTurn, square, square + 11, Pieces[(int)square + 11].Index);
                     }
 
                     if (EnPassant != Square.None)
@@ -688,11 +681,11 @@ namespace Assets.Project.ChessEngine
 
                     if (Pieces[(int)square - 9]?.Color == Color.White)
                     {
-                        moveList.AddPawnCaptureMove(OnTurn, square, square - 9, Pieces[(int)square - 9].Index);
+                        moveList.AddPawnCaptureMove(this, OnTurn, square, square - 9, Pieces[(int)square - 9].Index);
                     }
                     if (Pieces[(int)square - 11]?.Color == Color.White)
                     {
-                        moveList.AddPawnCaptureMove(OnTurn, square, square - 11, Pieces[(int)square - 11].Index);
+                        moveList.AddPawnCaptureMove(this, OnTurn, square, square - 11, Pieces[(int)square - 11].Index);
                     }
 
                     if (EnPassant != Square.None)
@@ -784,7 +777,7 @@ namespace Assets.Project.ChessEngine
                                         ToSq = tempSq,
                                         CapturedPiece = piece.Index
                                     };
-                                    moveList.AddCaptureMove(move);
+                                    moveList.AddCaptureMove(this, move);
                                 }
                                 break;
                             }
@@ -837,7 +830,7 @@ namespace Assets.Project.ChessEngine
                                     ToSq = tempSq,
                                     CapturedPiece = piece.Index
                                 };
-                                moveList.AddCaptureMove(move);
+                                moveList.AddCaptureMove(this, move);
                             }
                             direction = PieceDirection[pieceIndex + 2 - StartLoopNonSlideIndex[(int)OnTurn], index++];
                             continue;
@@ -891,7 +884,6 @@ namespace Assets.Project.ChessEngine
 
             Material[(int)piece.Color] += piece.Value;
         }
-
         private void RemovePiece(Square square)
         {
             Piece piece = Pieces[(int)square];
@@ -910,7 +902,6 @@ namespace Assets.Project.ChessEngine
 
             Material[(int)piece.Color] -= piece.Value;
         }
-
         private void MovePiece(Square from, Square to)
         {
             Piece piece = Pieces[(int)from];
@@ -1040,7 +1031,6 @@ namespace Assets.Project.ChessEngine
 
             return true;
         }
-
         public void UndoMove()
         {
             --HistoryPly;
@@ -1144,7 +1134,6 @@ namespace Assets.Project.ChessEngine
             }
             else return null;
         }
-
         public int GetPvLine(int depth)
         {
             Move move = ProbePvMove();
@@ -1227,7 +1216,6 @@ namespace Assets.Project.ChessEngine
         {
             return Mirror64[sq64];
         }
-
         public int EvaluatePosition()
         {
             int score = Material[(int)Color.White] - Material[(int)Color.Black];
@@ -1292,6 +1280,30 @@ namespace Assets.Project.ChessEngine
 
             if (OnTurn == Color.White) return score;
             else return -score;
+        }
+
+        private static readonly int[] VictimScore =
+        {
+            0, 100, 200, 300, 400, 500, 600, 100, 200, 300, 400, 500, 600
+        };
+        public static readonly int[,] MvvLvaScores = new int[Constants.PieceTypeCount, Constants.PieceTypeCount];
+
+        private static void InitMvvLva()
+        {
+            for (int vic = 1; vic < Constants.PieceTypeCount; ++vic)
+            {
+                for (int att = 1; att < Constants.PieceTypeCount; ++att)
+                {
+                    MvvLvaScores[vic, att] = VictimScore[vic] + 6 - (VictimScore[att] / 100);
+                }
+            }
+            /*for (int vic = 1; vic < Constants.PieceTypeCount; ++vic)
+            {
+                for (int att = 1; att < Constants.PieceTypeCount; ++att)
+                {
+                    Console.WriteLine("Attacker: {0} -> Victim {1} = Score {2}", Piece.GetLabelFromPieceIndex(att), Piece.GetLabelFromPieceIndex(vic), MvvLvaScores[vic, att]);
+                }
+            }*/
         }
         #endregion
         #region Search
