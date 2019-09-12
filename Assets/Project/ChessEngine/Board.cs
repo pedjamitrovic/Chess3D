@@ -1369,8 +1369,11 @@ namespace Assets.Project.ChessEngine
             Move bestMove = null;
             int score = -Constants.Infinity;
 
-            foreach (Move move in GenerateAllMoves())
+            MoveList moveList = GenerateAllMoves();
+
+            for (int i = 0; i < moveList.Count; ++i)
             {
+                Move move = moveList.PickNextMove(i);
                 if (!DoMove(move)) continue;
 
                 ++legalMovesCount;

@@ -1,13 +1,49 @@
 ﻿using Assets.Project.ChessEngine.Pieces;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
 namespace Assets.Project.ChessEngine
 {
-    public class MoveList : List<Move>
+    public class MoveList : IEnumerable
     {
+        private readonly int maxMoves = 256;
+        public Move[] Moves { get; set; }
+        public int Count { get; set; }
+        public Move this[int index]
+        {
+            get
+            {
+                return Moves[index];
+            }
+
+            set
+            {
+                Moves[index] = value;
+            }
+        }
+
+        public MoveList()
+        {
+            Moves = new Move[maxMoves];
+            Count = 0;
+        }
+        public Move PickNextMove(int moveIndex)
+        {
+            int bestScore = 0, bestIndex = moveIndex;
+            for (int i = moveIndex; i < Count; ++i)
+            {
+                if (Moves[i].Score > bestScore)
+                {
+                    bestScore = Moves[i].Score;
+                    bestIndex = i;
+                }
+            }
+            Swap(moveIndex, bestIndex);
+            return Moves[moveIndex];
+        }
         public void AddQuietMove(Move move)
         {
             move.Score = 0;
@@ -192,6 +228,29 @@ namespace Assets.Project.ChessEngine
                     });
                 }
             }
+        }
+        
+        private void Swap(int i, int j)
+        {
+            Move temp = Moves[i];
+            Moves[i] = Moves[j];
+            Moves[j] = temp;
+        }
+        private IEnumerable<Move> GetMoves()
+        {
+            for (int i = 0; i < Count; ++i) yield return Moves[i];
+        }
+        public IEnumerator<Move> GetEnumerator()
+        {
+            return GetMoves().GetEnumerator();
+        }
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+        private void Add(Move move)
+        {
+            Moves[Count++] = move;
         }
     }
 }
