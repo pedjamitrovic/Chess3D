@@ -25,7 +25,7 @@
         public static readonly int MaxSamePieceCount = 10; // 8 pawns can upgrade to same figure, plus max 2 same figures on board
 
         public static readonly int Infinity = 100000;
-        public static readonly int MaxSearchDepth = 16;
+        public static readonly int MaxSearchDepth = 128;
         public static readonly int IsMate = Infinity - MaxSearchDepth;
     }
 

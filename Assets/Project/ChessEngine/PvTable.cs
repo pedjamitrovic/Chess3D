@@ -15,7 +15,6 @@ namespace Assets.Project.ChessEngine
             public Move Move { get; set; }
             public int Score { get; set; }
             public int Depth { get; set; }
-            public Hf Hf { get; set; }
         };
         public int NewWriteCounter { get; private set; } = 0;
         public int OverWriteCounter { get; private set; } = 0;
@@ -33,34 +32,12 @@ namespace Assets.Project.ChessEngine
                     score = value.Score;
                     if (score > Constants.IsMate) score += board.Ply;
                     else if (score < -Constants.IsMate) score -= board.Ply;
-
-                    switch (value.Hf)
-                    {
-                        case Hf.Alpha:
-                            if (score <= alpha)
-                            {
-                                score = alpha;
-                                return true;
-                            }
-                            break;
-                        case Hf.Beta:
-                            if (score >= beta)
-                            {
-                                score = beta;
-                                return true;
-                            }
-                            break;
-                        case Hf.Exact:
-                            return true;
-                        default:
-                            throw new IllegalArgumentException("Hf undefined value error.");
-                    }
                 }
             }
             return false;
         }
 
-        public void StoreHashEntry(Board board, Move move, int score, int depth, Hf hf)
+        public void StoreHashEntry(Board board, Move move, int score, int depth)
         {
             if (ContainsKey(board.StateKey)) ++NewWriteCounter;
             else ++OverWriteCounter;
@@ -68,7 +45,7 @@ namespace Assets.Project.ChessEngine
             if (score > Constants.IsMate) score += board.Ply;
             else if (score < -Constants.IsMate) score -= board.Ply;
 
-            this[board.StateKey] = new PvTableValue() { Move = move, Score = score, Depth = depth, Hf = hf };
+            this[board.StateKey] = new PvTableValue() { Move = move, Score = score, Depth = depth };
         }
     }
 }

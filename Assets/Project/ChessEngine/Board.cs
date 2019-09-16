@@ -29,8 +29,6 @@ namespace Assets.Project.ChessEngine
         public LinkedList<UndoMove> History { get; set; } // list with data needed to undo past moves
         public PvTable PvTable { get; set; }
         public List<Move> PvMoves { get; set; }
-        public int[,] SearchHistory { get; set; }
-        public int[,] SearchKillers { get; set; }
         #endregion
         #region Methods
         /* Default ctor. */
@@ -1323,8 +1321,6 @@ namespace Assets.Project.ChessEngine
         }
         private void PrepareForSearch()
         {
-            SearchHistory = new int[Constants.PieceTypeCount, Constants.BoardSquareCount];
-            SearchKillers = new int[2, Constants.MaxSearchDepth];
             PvTable = new PvTable();
             Ply = 0;
         }
@@ -1339,7 +1335,7 @@ namespace Assets.Project.ChessEngine
 
             for (int currentDepth = 1; currentDepth <= info.DepthLimit; ++currentDepth) // iterative deepening
             {
-                bestScore = AlphaBeta(-Constants.Infinity, Constants.Infinity, currentDepth, info, true);
+                bestScore = AlphaBeta(-Constants.Infinity, Constants.Infinity, currentDepth, info);
                 GetPvLine(currentDepth);
                 bestMove = PvMoves.Count > 0 ? PvMoves[0] : null;
 
@@ -1349,12 +1345,12 @@ namespace Assets.Project.ChessEngine
                 {
                     sb.AppendFormat(" {0}", move);
                 }
-                sb.AppendFormat(" Ordering: {0}", info.Fh > 0 ? (info.Fhf / info.Fh).ToString("F") : "-1");
+                //sb.AppendFormat(" Ordering: {0}", info.Fh > 0 ? (info.Fhf / info.Fh).ToString("F") : "-1");
                 sb.Append(Environment.NewLine);
             }
             return sb.ToString();
         }
-        public int AlphaBeta(int alpha, int beta, int depth, SearchInfo info, bool doNull)
+        public int AlphaBeta(int alpha, int beta, int depth, SearchInfo info)
         {
             ++info.NodesVisited;
 
@@ -1377,7 +1373,7 @@ namespace Assets.Project.ChessEngine
                 if (!DoMove(move)) continue;
 
                 ++legalMovesCount;
-                score = -AlphaBeta(-beta, -alpha, depth - 1, info, true);
+                score = -AlphaBeta(-beta, -alpha, depth - 1, info);
                 UndoMove();
 
                 if (score > alpha)
@@ -1402,7 +1398,7 @@ namespace Assets.Project.ChessEngine
                 else return 0;
             }
 
-            if (alpha != oldAlpha) { PvTable.StoreHashEntry(this, bestMove, score, depth, 0); }
+            if (alpha != oldAlpha) { PvTable.StoreHashEntry(this, bestMove, score, depth); }
 
             return alpha;
         }
