@@ -26,8 +26,8 @@ namespace Assets.Project.ChessEngine
         private static readonly int promotedPieceMask = 0xF;
         private static readonly int isCastleMask = 0x1000000;
 
-        public int Value { get; private set; } = 0;
-        public int Score { get; set; } = 0;
+        public int Value { get; private set; }
+        public int Score { get; set; }
 
         public Square FromSq
         {

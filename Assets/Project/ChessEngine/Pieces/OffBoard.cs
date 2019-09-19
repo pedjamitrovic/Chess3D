@@ -3,11 +3,11 @@
     /* Dummy piece for out of bounds check */
     public sealed class OffLimits : Piece
     {
-        public static OffLimits Instance { get; private set; } = new OffLimits();
+        public static OffLimits Instance { get; private set; }
 
         static OffLimits()
         {
-
+            Instance = new OffLimits();
         }
 
         public override char Label

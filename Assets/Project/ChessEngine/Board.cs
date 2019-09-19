@@ -588,11 +588,11 @@ namespace Assets.Project.ChessEngine
                         }
                     }
 
-                    if (Pieces[(int)square + 9]?.Color == Color.Black)
+                    if (Pieces[(int)square + 9] != null && Pieces[(int)square + 9].Color == Color.Black)
                     {
                         moveList.AddPawnCaptureMove(this, OnTurn, square, square + 9, Pieces[(int)square + 9].Index);
                     }
-                    if (Pieces[(int)square + 11]?.Color == Color.Black)
+                    if (Pieces[(int)square + 11] != null && Pieces[(int)square + 11].Color == Color.Black)
                     {
                         moveList.AddPawnCaptureMove(this, OnTurn, square, square + 11, Pieces[(int)square + 11].Index);
                     }
@@ -677,11 +677,11 @@ namespace Assets.Project.ChessEngine
                         }
                     }
 
-                    if (Pieces[(int)square - 9]?.Color == Color.White)
+                    if (Pieces[(int)square - 9] != null && Pieces[(int)square - 9].Color == Color.White)
                     {
                         moveList.AddPawnCaptureMove(this, OnTurn, square, square - 9, Pieces[(int)square - 9].Index);
                     }
-                    if (Pieces[(int)square - 11]?.Color == Color.White)
+                    if (Pieces[(int)square - 11] != null && Pieces[(int)square - 11].Color == Color.White)
                     {
                         moveList.AddPawnCaptureMove(this, OnTurn, square, square - 11, Pieces[(int)square - 11].Index);
                     }
@@ -1126,7 +1126,8 @@ namespace Assets.Project.ChessEngine
         #region PrincipalVariation
         public Move ProbePvMove()
         {
-            if (PvTable.TryGetValue(StateKey, out var value))
+            PvTableValue value;
+            if (PvTable.TryGetValue(StateKey, out value))
             {
                 return value.Move;
             }
@@ -1380,8 +1381,6 @@ namespace Assets.Project.ChessEngine
                 {
                     if (score >= beta)
                     {
-                        if (legalMovesCount == 1) ++info.Fhf;
-                        ++info.Fh;
                         return beta;
                     }
                     alpha = score;

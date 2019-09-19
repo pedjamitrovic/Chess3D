@@ -13,8 +13,6 @@ namespace Assets.Project.ChessEngine
         public int TimeLimit { get; set; }
         public bool Infinite { get; set; }
         public long NodesVisited { get; set; }
-        public decimal Fh { get; set; }
-        public decimal Fhf { get; set; }
 
         public bool Quit { get; set; }
         public bool Stopped { get; set; }

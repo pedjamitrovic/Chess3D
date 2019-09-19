@@ -15,7 +15,6 @@
         A8 = 91, B8, C8, D8, E8, F8, G8, H8, None = 99,
     };
     public enum CastlingPermit { WhiteKingCastling = 1, WhiteQueenCastling = 2, BlackKingCastling = 4, BlackQueenCastling = 8 };
-    public enum Hf { None, Alpha, Beta, Exact };
     public static class Constants
     {
         public static readonly int BoardSquareCount = 120; // 120 square board representation style
