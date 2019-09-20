@@ -1,7 +1,5 @@
-﻿
-using Assets.Project.ChessEngine.Exceptions;
+﻿using Assets.Project.ChessEngine.Exceptions;
 using System;
-using System.Collections.Generic;
 
 namespace Assets.Project.ChessEngine.Pieces
 {

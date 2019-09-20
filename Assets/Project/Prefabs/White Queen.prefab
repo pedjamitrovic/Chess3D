@@ -21,8 +21,8 @@ GameObject:
   - component: {fileID: 4011343921335002}
   - component: {fileID: 33023447077393174}
   - component: {fileID: 23130532683746060}
-  - component: {fileID: 114941606949204396}
   - component: {fileID: 64070601203584822}
+  - component: {fileID: 114687946964808010}
   m_Layer: 8
   m_Name: White Queen
   m_TagString: Untagged
@@ -98,7 +98,7 @@ MeshCollider:
   m_InflateMesh: 0
   m_SkinWidth: 0.01
   m_Mesh: {fileID: 4300000, guid: f4285efefb82a4b62a2378a8762e2951, type: 3}
---- !u!114 &114941606949204396
+--- !u!114 &114687946964808010
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -106,9 +106,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 1639620864090624}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 857b9001fd1869a498bea058cbf64a1b, type: 3}
+  m_Script: {fileID: 11500000, guid: 9cf2c4142f2b0a240989ff8c93a6c37e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CellNumber: 0
-  isWhite: 1
-  uiEngine: {fileID: 0}

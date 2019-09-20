@@ -21,8 +21,8 @@ GameObject:
   - component: {fileID: 4907335115339660}
   - component: {fileID: 33717675187569760}
   - component: {fileID: 23646452995543282}
-  - component: {fileID: 114167285842052784}
   - component: {fileID: 64785871935160972}
+  - component: {fileID: 114541087978048410}
   m_Layer: 8
   m_Name: Black King
   m_TagString: Untagged
@@ -98,7 +98,7 @@ MeshCollider:
   m_InflateMesh: 0
   m_SkinWidth: 0.01
   m_Mesh: {fileID: 4300000, guid: 38b25f2f6027b4fe3a7e76c64d059379, type: 3}
---- !u!114 &114167285842052784
+--- !u!114 &114541087978048410
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -106,9 +106,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 1381633088875808}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6194213f43196bd45a1c085ec17e4754, type: 3}
+  m_Script: {fileID: 11500000, guid: 9cf2c4142f2b0a240989ff8c93a6c37e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CellNumber: 0
-  isWhite: 0
-  uiEngine: {fileID: 0}

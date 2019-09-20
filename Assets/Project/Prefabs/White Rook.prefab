@@ -21,8 +21,8 @@ GameObject:
   - component: {fileID: 4028849186913422}
   - component: {fileID: 33706426119269344}
   - component: {fileID: 23385801290477440}
-  - component: {fileID: 114530272156178360}
   - component: {fileID: 64860909164900308}
+  - component: {fileID: 114558900297951564}
   m_Layer: 8
   m_Name: White Rook
   m_TagString: Untagged
@@ -98,7 +98,7 @@ MeshCollider:
   m_InflateMesh: 0
   m_SkinWidth: 0.01
   m_Mesh: {fileID: 4300000, guid: 0260a05ef2c2a496f852aa0422dce267, type: 3}
---- !u!114 &114530272156178360
+--- !u!114 &114558900297951564
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -106,9 +106,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 1536104987182252}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 154af2afdb69a9646ad842a9c5a2a46d, type: 3}
+  m_Script: {fileID: 11500000, guid: 9cf2c4142f2b0a240989ff8c93a6c37e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CellNumber: 0
-  isWhite: 1
-  uiEngine: {fileID: 0}

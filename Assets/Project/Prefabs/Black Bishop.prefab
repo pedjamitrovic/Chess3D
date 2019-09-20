@@ -21,8 +21,8 @@ GameObject:
   - component: {fileID: 4602865410347430}
   - component: {fileID: 33556407682897654}
   - component: {fileID: 23739529985042458}
-  - component: {fileID: 114362289248671058}
   - component: {fileID: 64878072467638384}
+  - component: {fileID: 114956450886154144}
   m_Layer: 8
   m_Name: Black Bishop
   m_TagString: Untagged
@@ -98,7 +98,7 @@ MeshCollider:
   m_InflateMesh: 0
   m_SkinWidth: 0.01
   m_Mesh: {fileID: 4300000, guid: 655746ad7a320435e83fa1313563ebfd, type: 3}
---- !u!114 &114362289248671058
+--- !u!114 &114956450886154144
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -106,9 +106,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 1479989141987308}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 903a15bf9b30ca649917318d3f758d21, type: 3}
+  m_Script: {fileID: 11500000, guid: 9cf2c4142f2b0a240989ff8c93a6c37e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CellNumber: 0
-  isWhite: 0
-  uiEngine: {fileID: 0}
