@@ -7,12 +7,12 @@ namespace Assets.Project.Chess3D
     public class Bot : IPlayer
     {
         public string Id { get; set; }
-        private readonly UiController uiController;
+        private readonly GameUiController uiController;
 
         public Bot()
         {
             Id = "Bot";
-            uiController = GameObject.FindGameObjectWithTag("UiController").GetComponent<UiController>();
+            uiController = GameObject.FindGameObjectWithTag("UiController").GetComponent<GameUiController>();
         }
 
         public Task CalculateNextMove()
@@ -24,14 +24,12 @@ namespace Assets.Project.Chess3D
         public Task SelectFigure(SemaphoreSlim semaphore)
         {
             var task = Task.Run(() => { semaphore.Wait(); });
-            uiController.ShowSelectFigure(this);
             return task;
         }
 
         public Task SelectSquare(SemaphoreSlim semaphore)
         {
             var task = Task.Run(() => { semaphore.Wait(); });
-            uiController.ShowSelectSquare(this);
             return task;
         }
     }

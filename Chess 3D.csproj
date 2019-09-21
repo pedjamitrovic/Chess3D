@@ -12,13 +12,16 @@
     <ProjectTypeGuids>{E097FAD1-6243-4DAD-9C02-E9B9EFC3FFC1};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
-    <TargetFrameworkProfile></TargetFrameworkProfile>
-    <CompilerResponseFile></CompilerResponseFile>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <CompilerResponseFile>
+    </CompilerResponseFile>
     <UnityProjectGenerator>VSTU</UnityProjectGenerator>
     <UnityProjectType>Game:1</UnityProjectType>
     <UnityBuildTarget>StandaloneWindows64:19</UnityBuildTarget>
     <UnityVersion>2017.2.0f3</UnityVersion>
-    <RootNamespace></RootNamespace>
+    <RootNamespace>
+    </RootNamespace>
     <LangVersion>6</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
@@ -238,11 +241,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Project\Chess3D\Control\EventManager.cs" />
-    <Compile Include="Assets\Project\Chess3D\Control\GameController.cs" />
-    <Compile Include="Assets\Project\Chess3D\Control\Spawner.cs" />
-    <Compile Include="Assets\Project\Chess3D\Control\UiController.cs" />
-    <Compile Include="Assets\Project\Chess3D\Control\Visualizer.cs" />
+    <Compile Include="Assets\Project\Chess3D\Dependency\InjectionContext.cs" />
+    <Compile Include="Assets\Project\Chess3D\Dependency\SceneLoading.cs" />
+    <Compile Include="Assets\Project\Chess3D\Game\EventManager.cs" />
+    <Compile Include="Assets\Project\Chess3D\Game\GameController.cs" />
+    <Compile Include="Assets\Project\Chess3D\Game\Spawner.cs" />
+    <Compile Include="Assets\Project\Chess3D\Game\GameUiController.cs" />
+    <Compile Include="Assets\Project\Chess3D\Game\Visualizer.cs" />
+    <Compile Include="Assets\Project\Chess3D\Menu\MenuUiController.cs" />
     <Compile Include="Assets\Project\Chess3D\Pieces\PieceWrapper.cs" />
     <Compile Include="Assets\Project\Chess3D\Players\Bot.cs" />
     <Compile Include="Assets\Project\Chess3D\Players\Human.cs" />

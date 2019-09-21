@@ -63,96 +63,103 @@ namespace Assets.Project.ChessEngine
         /* Parses FEN string in order and inits Board with parsed values. */
         public Board(string fen) : this()
         {
-            int count;
-            File file = File.FileA;
-            Rank rank = Rank.Rank8;
-            int i = 0;
-
-            char? pieceLabel = null;
-
-            for (; rank >= Rank.Rank1; ++i)
+            try
             {
-                count = 1;
-                switch (fen[i])
+                int count;
+                File file = File.FileA;
+                Rank rank = Rank.Rank8;
+                int i = 0;
+
+                char? pieceLabel = null;
+
+                for (; rank >= Rank.Rank1; ++i)
                 {
-                    case 'p':
-                    case 'n':
-                    case 'b':
-                    case 'r':
-                    case 'k':
-                    case 'q':
-                    case 'P':
-                    case 'N':
-                    case 'B':
-                    case 'R':
-                    case 'K':
-                    case 'Q':
-                        pieceLabel = fen[i];
-                        break;
-
-                    case '1':
-                    case '2':
-                    case '3':
-                    case '4':
-                    case '5':
-                    case '6':
-                    case '7':
-                    case '8':
-                        pieceLabel = null;
-                        count = fen[i] - '0';
-                        break;
-
-                    case '/':
-                    case ' ':
-                        rank--;
-                        file = File.FileA;
-                        continue;
-
-                    default:
-                        throw new FENFormatException("FEN parsing error");
-                }
-
-                int sq64, sq120;
-                for (int j = 0; j < count; ++j)
-                {
-                    sq64 = (int)rank * 8 + (int)file;
-                    sq120 = Sq120(sq64);
-                    if (pieceLabel.HasValue)
+                    count = 1;
+                    switch (fen[i])
                     {
-                        int pieceIndex = Piece.GetIndexFromPieceLabel(pieceLabel.Value);
-                        Pieces[sq120] = pieceFactory.CreatePiece(pieceIndex, (Square)sq120);
+                        case 'p':
+                        case 'n':
+                        case 'b':
+                        case 'r':
+                        case 'k':
+                        case 'q':
+                        case 'P':
+                        case 'N':
+                        case 'B':
+                        case 'R':
+                        case 'K':
+                        case 'Q':
+                            pieceLabel = fen[i];
+                            break;
+
+                        case '1':
+                        case '2':
+                        case '3':
+                        case '4':
+                        case '5':
+                        case '6':
+                        case '7':
+                        case '8':
+                            pieceLabel = null;
+                            count = fen[i] - '0';
+                            break;
+
+                        case '/':
+                        case ' ':
+                            rank--;
+                            file = File.FileA;
+                            continue;
+
+                        default:
+                            throw new FENFormatException("FEN parsing error.");
                     }
-                    file++;
+
+                    int sq64, sq120;
+                    for (int j = 0; j < count; ++j)
+                    {
+                        sq64 = (int)rank * 8 + (int)file;
+                        sq120 = Sq120(sq64);
+                        if (pieceLabel.HasValue)
+                        {
+                            int pieceIndex = Piece.GetIndexFromPieceLabel(pieceLabel.Value);
+                            Pieces[sq120] = pieceFactory.CreatePiece(pieceIndex, (Square)sq120);
+                        }
+                        file++;
+                    }
                 }
-            }
 
-            OnTurn = (fen[i] == 'w') ? Color.White : Color.Black;
-            i += 2;
+                OnTurn = (fen[i] == 'w') ? Color.White : Color.Black;
+                i += 2;
 
-            for (int j = 0; fen[i] != ' ' && j < 4; ++j, ++i)
-            {
-                switch (fen[i])
+                for (int j = 0; fen[i] != ' ' && j < 4; ++j, ++i)
                 {
-                    case 'k': CastlePerm |= (int)CastlingPermit.BlackKingCastling; break;
-                    case 'q': CastlePerm |= (int)CastlingPermit.BlackQueenCastling; break;
-                    case 'K': CastlePerm |= (int)CastlingPermit.WhiteKingCastling; break;
-                    case 'Q': CastlePerm |= (int)CastlingPermit.WhiteQueenCastling; break;
-                    default: break;
+                    switch (fen[i])
+                    {
+                        case 'k': CastlePerm |= (int)CastlingPermit.BlackKingCastling; break;
+                        case 'q': CastlePerm |= (int)CastlingPermit.BlackQueenCastling; break;
+                        case 'K': CastlePerm |= (int)CastlingPermit.WhiteKingCastling; break;
+                        case 'Q': CastlePerm |= (int)CastlingPermit.WhiteQueenCastling; break;
+                        default: break;
+                    }
                 }
-            }
-            i++;
+                i++;
 
-            if (fen[i] != '-')
+                if (fen[i] != '-')
+                {
+                    file = (File)(fen[i] - 'a');
+                    rank = (Rank)(fen[i + 1] - '1');
+
+                    EnPassant = (Square)ConvertToSq120(file, rank);
+                }
+
+                StateKey = CalculateStateKey();
+
+                UpdateListsAndMaterial();
+            }
+            catch (Exception)
             {
-                file = (File)(fen[i] - 'a');
-                rank = (Rank)(fen[i + 1] - '1');
-
-                EnPassant = (Square)ConvertToSq120(file, rank);
+                throw new FENFormatException("FEN parsing error. Try again.");
             }
-
-            StateKey = CalculateStateKey();
-
-            UpdateListsAndMaterial();
         }
         /* Updates tracked data of importance based on current board pieces. It should be called after any board state change is made. */
         public void UpdateListsAndMaterial()
