@@ -10,6 +10,7 @@ namespace Assets.Project.Chess3D
     {
         public enum Materials { Gold, White, Black };
         public Spawner spawner;
+        public GameController gameController;
         public List<Material> materials;
 
         void Start()
@@ -18,6 +19,7 @@ namespace Assets.Project.Chess3D
 
         public void HighlightPiece(Piece piece)
         {
+            if (gameController.OnTurn is Bot) return;
             PieceWrapper wrapper = spawner.FindPieceWrapper(piece);
             try
             {
@@ -35,6 +37,7 @@ namespace Assets.Project.Chess3D
         }
         public void RemoveHighlightFromPiece(Piece piece)
         {
+            if (gameController.OnTurn is Bot) return;
             PieceWrapper wrapper = spawner.FindPieceWrapper(piece);
             try
             {

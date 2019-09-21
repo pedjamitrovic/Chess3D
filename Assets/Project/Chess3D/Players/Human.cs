@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using Assets.Project.ChessEngine;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -7,29 +8,34 @@ namespace Assets.Project.Chess3D
     public class Human : IPlayer
     {
         public string Id { get; set; }
-        private readonly GameUiController uiController;
+        public GameController GameController;
 
-        public Human(string id)
+        public SemaphoreSlim Semaphore { get; private set; }
+
+        public Human(GameController gc, string id)
         {
             Id = id;
-            uiController = GameObject.FindGameObjectWithTag("UiController").GetComponent<GameUiController>();
+            GameController = gc;
+            Semaphore = new SemaphoreSlim(0, 1);
         }
 
-        public Task CalculateNextMove()
+        public Task<Move> CalculateNextMove()
         {
-            var task = Task.Run(() => { });
+            var task = Task.Run(() => { return new Move(); });
             return task;
         }
 
-        public Task SelectFigure(SemaphoreSlim semaphore)
+        public Task SelectPiece()
         {
-            var task = Task.Run(() => { semaphore.Wait(); });
+            var task = Task.Run(() => { Semaphore.Wait(); });
+            GameController.UiController.ShowInputInfoText(Id + " (Human), select piece to move.");
             return task;
         }
 
-        public Task SelectSquare(SemaphoreSlim semaphore)
+        public Task DoMove()
         {
-            var task = Task.Run(() => { semaphore.Wait(); });
+            var task = Task.Run(() => { Semaphore.Wait(); });
+            GameController.UiController.ShowInputInfoText(Id + " (Human), select square to move.");
             return task;
         }
     }

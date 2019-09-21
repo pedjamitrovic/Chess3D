@@ -14,6 +14,7 @@ public class EventManager : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (!(gc.OnTurn is Human)) return;
         if (Input.GetMouseButtonDown(0))
         {
             RaycastHit hit;

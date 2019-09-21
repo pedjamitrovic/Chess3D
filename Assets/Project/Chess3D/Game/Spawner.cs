@@ -9,6 +9,7 @@ namespace Assets.Project.Chess3D
     public class Spawner: MonoBehaviour
     {
         public List<Transform> piecePrefabs;
+        public GameObject Pieces;
         public GameController gc;
 
         void Start()
@@ -65,7 +66,7 @@ namespace Assets.Project.Chess3D
             Vector3 worldPoint = ToWorldPoint(Board.Sq64((int)piece.Square));
             Transform transform = Instantiate(piecePrefabs[piece.Index]);
             transform.position = new Vector3(worldPoint.x, transform.position.y, worldPoint.z);
-            transform.parent = GameObject.Find("Pieces").transform;
+            transform.parent = Pieces.transform;
             PieceWrapper wrapper = transform.GetComponent<PieceWrapper>();
             wrapper.Value = piece;
             return wrapper;
@@ -86,8 +87,7 @@ namespace Assets.Project.Chess3D
 
         public PieceWrapper FindPieceWrapper(Piece piece)
         {
-            GameObject pieces = GameObject.Find("Pieces");
-            foreach (Transform child in pieces.transform)
+            foreach (Transform child in Pieces.transform)
             {
                 PieceWrapper current = child.GetComponent<PieceWrapper>();
                 if (current.Value.Square == piece.Square) return current;

@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using Assets.Project.ChessEngine;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -7,29 +8,40 @@ namespace Assets.Project.Chess3D
     public class Bot : IPlayer
     {
         public string Id { get; set; }
-        private readonly GameUiController uiController;
+        public int Depth { get; set; }
+        private readonly GameController GameController;
 
-        public Bot()
+        public Bot(GameController gc, string id, int depth)
         {
-            Id = "Bot";
-            uiController = GameObject.FindGameObjectWithTag("UiController").GetComponent<GameUiController>();
+            GameController = gc;
+            Id = id;
+            Depth = depth;
         }
 
-        public Task CalculateNextMove()
+        public Task<Move> CalculateNextMove()
         {
-            var task = Task.Run(() => { });
+            var task = Task.Run(() =>
+            {
+                SearchInfo searchInfo = new SearchInfo
+                {
+                    DepthLimit = Depth
+                };
+                GameController.Board.SearchPosition(searchInfo);
+                return GameController.Board.PvMoves[0];
+            });
+            GameController.UiController.ShowInputInfoText(Id + " (Bot) is calculating.");
             return task;
         }
 
-        public Task SelectFigure(SemaphoreSlim semaphore)
+        public Task SelectPiece()
         {
-            var task = Task.Run(() => { semaphore.Wait(); });
+            var task = Task.Run(() => {} );
             return task;
         }
 
-        public Task SelectSquare(SemaphoreSlim semaphore)
+        public Task DoMove()
         {
-            var task = Task.Run(() => { semaphore.Wait(); });
+            var task = Task.Run(() => {} );
             return task;
         }
     }

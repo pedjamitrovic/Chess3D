@@ -366,7 +366,7 @@ namespace Assets.Project.ChessEngine
                 {
                     square = ConvertToSq120(file, rank);
                     piece = Pieces[square];
-                    sb.Append(piece.Label);
+                    sb.Append(piece != null ? piece.Label : '-');
                 }
                 sb.Append(Environment.NewLine);
             }
@@ -1155,12 +1155,13 @@ namespace Assets.Project.ChessEngine
                 {
                     DoMove(move);
                     PvMoves.Add(move);
+                    count++;
                 }
                 else break;
                 move = ProbePvMove();
             }
 
-            while (History.Count > 0)
+            while (count-- > 0)
             {
                 UndoMove();
             }

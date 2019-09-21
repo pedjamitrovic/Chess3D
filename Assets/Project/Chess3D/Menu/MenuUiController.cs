@@ -62,9 +62,9 @@ public class MenuUiController : MonoBehaviour
             SceneLoading.Context.Inject(SceneLoading.Parameters.Board, board);
             SceneManager.LoadScene("Game");
         }
-        catch (FENFormatException e)
+        catch (Exception)
         {
-            ErrorText.text = e.Message;
+            ErrorText.text = "Invalid FEN format. Try again.";
         }
     }
     private void OnExitClicked()

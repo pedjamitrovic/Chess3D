@@ -50,7 +50,7 @@
         public static string GetLabel(this Square sq)
         {
             int val = (int)sq;
-            if (val == 0) return "-";
+            if (val == 99) return "-";
             else
             {
                 int file = (val - 21) % 10;
