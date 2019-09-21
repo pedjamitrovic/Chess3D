@@ -9,6 +9,8 @@ namespace Assets.Project.Chess3D
     {
         public string Id { get; set; }
         public int Depth { get; set; }
+
+        public string LastSearchResult { get; set; }
         private readonly GameController GameController;
 
         public Bot(GameController gc, string id, int depth)
@@ -26,7 +28,7 @@ namespace Assets.Project.Chess3D
                 {
                     DepthLimit = Depth
                 };
-                GameController.Board.SearchPosition(searchInfo);
+                LastSearchResult = GameController.Board.SearchPosition(searchInfo);
                 return GameController.Board.PvMoves[0];
             });
             GameController.UiController.ShowInputInfoText(Id + " (Bot) is calculating.");

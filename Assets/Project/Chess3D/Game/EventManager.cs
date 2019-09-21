@@ -7,6 +7,8 @@ public class EventManager : MonoBehaviour
 {
     public GameController gc;
 
+    private bool blocked = false;
+
     void Start()
     {
         gc = GameObject.Find("GameController").transform.GetComponent<GameController>();
@@ -14,6 +16,7 @@ public class EventManager : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (blocked) return;
         if (!(gc.OnTurn is Human)) return;
         if (Input.GetMouseButtonDown(0))
         {
@@ -51,5 +54,10 @@ public class EventManager : MonoBehaviour
             return i * 8 + j;
         }
         return -1;
+    }
+
+    public void BlockEvents()
+    {
+        blocked = true;
     }
 }

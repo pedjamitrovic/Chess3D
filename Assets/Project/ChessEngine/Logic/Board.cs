@@ -1142,7 +1142,7 @@ namespace Assets.Project.ChessEngine
             }
             else return null;
         }
-        private int GetPvLine(int depth)
+        private void GetPvLine(int depth)
         {
             Move move = ProbePvMove();
             int count = 0;
@@ -1165,8 +1165,6 @@ namespace Assets.Project.ChessEngine
             {
                 UndoMove();
             }
-
-            return count;
         }
         #endregion
         #region Evaluation
@@ -1334,30 +1332,38 @@ namespace Assets.Project.ChessEngine
         {
             PvTable = new PvTable();
             Ply = 0;
+            stopwatch.Reset();
         }
+
+        private Stopwatch stopwatch = new Stopwatch();
         public string SearchPosition(SearchInfo info)
         {
             PrepareForSearch();
 
             Move bestMove = null;
             int bestScore = -Constants.Infinity;
-
+            
             StringBuilder sb = new StringBuilder();
 
+            stopwatch.Start();
             for (int currentDepth = 1; currentDepth <= info.DepthLimit; ++currentDepth) // iterative deepening
             {
                 bestScore = AlphaBeta(-Constants.Infinity, Constants.Infinity, currentDepth, info);
                 GetPvLine(currentDepth);
                 bestMove = PvMoves.Count > 0 ? PvMoves[0] : null;
 
-                sb.AppendFormat("Depth: {0} Score: {1} Move: {2}, NodesVisited: {3} ", currentDepth, bestScore, bestMove, info.NodesVisited);
-                sb.Append("Pv:");
-                foreach (Move move in PvMoves)
+                if (currentDepth == info.DepthLimit)
                 {
-                    sb.AppendFormat(" {0}", move);
+                    stopwatch.Stop();
+                    Decimal timeSpent = new Decimal(stopwatch.ElapsedMilliseconds);
+                    sb.AppendFormat("Depth: {0} Score: {1} Best move: {2}, Visited {3} nodes in {4}s ", currentDepth, bestScore, bestMove, info.NodesVisited, decimal.Round(timeSpent / 1000, 3));
+                    sb.Append("Pv:");
+                    foreach (Move move in PvMoves)
+                    {
+                        sb.AppendFormat(" {0}", move);
+                    }
+                    sb.Append(Environment.NewLine);
                 }
-                //sb.AppendFormat(" Ordering: {0}", info.Fh > 0 ? (info.Fhf / info.Fh).ToString("F") : "-1");
-                sb.Append(Environment.NewLine);
             }
             return sb.ToString();
         }

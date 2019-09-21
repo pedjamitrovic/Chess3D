@@ -69,14 +69,15 @@ namespace Assets.Project.Chess3D
         {
             while (true)
             {
-                Debug.Log(Board.ToString());
                 OnTurn = Players[(int)Board.OnTurn];
                 if (NoPossibleMoves()) break;
-                
+
                 Move move = await OnTurn.CalculateNextMove();
 
                 if (OnTurn is Bot)
                 {
+                    Bot bot = OnTurn as Bot;
+                    UiController.ShowSearchInfoText(bot.LastSearchResult);
                     SelectPiece((int)move.FromSq);
                     DoMove((int)move.ToSq);
                 }
@@ -94,6 +95,7 @@ namespace Assets.Project.Chess3D
         {
             IPlayer winner = Players[(int)Board.OnTurn ^ 1];
             UiController.EndGame(winner.Id + " wins.");
+            EventManager.BlockEvents();
         }
 
         private bool NoPossibleMoves()
@@ -115,7 +117,7 @@ namespace Assets.Project.Chess3D
             Human human = OnTurn as Human;
             if (human != null)
             {
-                human.Semaphore.Release();
+                if (human.Semaphore.CurrentCount == 0) human.Semaphore.Release();
             }
         }
 

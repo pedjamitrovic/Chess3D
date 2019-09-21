@@ -1,6 +1,7 @@
 ﻿using Assets.Project.Chess3D.Pieces;
 using Assets.Project.ChessEngine;
 using Assets.Project.ChessEngine.Pieces;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -53,12 +54,11 @@ namespace Assets.Project.Chess3D
                 DestroyPiece(gc.Board.Pieces[(int)move.ToSq]);
             }
 
-            MovePiece(gc.Board.Pieces[(int)move.FromSq], Board.Sq64((int)move.ToSq));
-
             if (move.PromotedPiece.HasValue)
             {
                 DestroyPiece(gc.Board.Pieces[(int)move.FromSq]);
             }
+            else MovePiece(gc.Board.Pieces[(int)move.FromSq], Board.Sq64((int)move.ToSq));
         }
 
         public PieceWrapper SpawnPiece(Piece piece)
@@ -68,20 +68,29 @@ namespace Assets.Project.Chess3D
             transform.position = new Vector3(worldPoint.x, transform.position.y, worldPoint.z);
             transform.parent = Pieces.transform;
             PieceWrapper wrapper = transform.GetComponent<PieceWrapper>();
-            wrapper.Value = piece;
+            wrapper.Square = piece.Square;
             return wrapper;
         }
 
         public void DestroyPiece(Piece piece)
         {
-            PieceWrapper wrapper = FindPieceWrapper(piece);
-            Destroy(wrapper.gameObject);
+            try
+            {
+                PieceWrapper wrapper = FindPieceWrapper(piece);
+                Destroy(wrapper.gameObject);
+            }
+            catch (Exception e)
+            {
+                Debug.Log(gc.Board.ToString());
+                throw e;
+            }
         }
 
         public void MovePiece(Piece piece, int sq64)
         {
             Vector3 worldPoint = ToWorldPoint(sq64);
             PieceWrapper wrapper = FindPieceWrapper(piece);
+            wrapper.Square = (Square)Board.Sq120(sq64);
             wrapper.transform.position = new Vector3(worldPoint.x, wrapper.transform.position.y, worldPoint.z);
         }
 
@@ -90,7 +99,7 @@ namespace Assets.Project.Chess3D
             foreach (Transform child in Pieces.transform)
             {
                 PieceWrapper current = child.GetComponent<PieceWrapper>();
-                if (current.Value.Square == piece.Square) return current;
+                if (current.Square == piece.Square) return current;
             }
             return null;
         }

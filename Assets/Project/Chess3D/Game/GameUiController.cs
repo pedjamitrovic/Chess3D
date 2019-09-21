@@ -58,7 +58,6 @@ namespace Assets.Project.Chess3D
         {
             InputInfoText.text = string.Empty;
             ErrorText.text = string.Empty;
-            SearchInfoText.text = string.Empty;
         }
 
         public void OnEndClicked()

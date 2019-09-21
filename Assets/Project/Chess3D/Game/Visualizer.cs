@@ -43,7 +43,7 @@ namespace Assets.Project.Chess3D
             {
                 if (wrapper != null)
                 {
-                    var mat = (wrapper.Value.Color == ChessEngine.Color.White ? materials[(int)Materials.White] : materials[(int)Materials.Black]);
+                    var mat = (piece.Color == ChessEngine.Color.White ? materials[(int)Materials.White] : materials[(int)Materials.Black]);
                     var ren = wrapper.GetComponent<Renderer>();
                     ren.material = mat;
                 }
