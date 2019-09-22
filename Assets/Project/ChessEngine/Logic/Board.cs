@@ -30,6 +30,7 @@ namespace Assets.Project.ChessEngine
         public PvTable PvTable { get; set; }
         public List<Move> PvMoves { get; set; }
         #endregion
+
         #region Methods
         /* Default ctor. */
         public Board()
@@ -391,6 +392,7 @@ namespace Assets.Project.ChessEngine
         }
 
         #endregion
+
         #region Static
         private static readonly int[] SqIndexes120To64;
         private static readonly int[] SqIndexes64To120;
@@ -471,9 +473,10 @@ namespace Assets.Project.ChessEngine
             return (Rank)RankBoard[(int)square];
         }
         #endregion
+
         #region HashGenerator
-        private static ulong[,] pieceKeys; // 13x120
-        private static ulong sideKey;
+        private static ulong[,] pieceKeys; // 13x120 12 + 1 en passant
+        private static ulong sideKey; // black or white
         private static ulong[] castleKeys; // 16 (4 bit representation 0-15 values)
         private static Random rnd = new Random();
 
@@ -545,6 +548,7 @@ namespace Assets.Project.ChessEngine
             return longRand % (maxValue - minValue) + minValue;
         }
         #endregion
+
         #region MoveGenerator
         private static readonly int[] StartLoopSlideIndex = { 0, 4 };
         private static readonly int[] StartLoopNonSlideIndex = { 0, 3 };
@@ -856,6 +860,7 @@ namespace Assets.Project.ChessEngine
             return moveList;
         }
         #endregion
+
         #region MoveHandler
         private readonly int[] castlePermXorValues = {
             15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
@@ -1132,6 +1137,7 @@ namespace Assets.Project.ChessEngine
             return false;
         }
         #endregion
+
         #region PrincipalVariation
         private Move ProbePvMove()
         {
@@ -1167,6 +1173,7 @@ namespace Assets.Project.ChessEngine
             }
         }
         #endregion
+
         #region Evaluation
         private static readonly int[] PawnPositionValue = {
         0   ,   0   ,   0   ,   0   ,   0   ,   0   ,   0   ,   0   ,
@@ -1313,6 +1320,7 @@ namespace Assets.Project.ChessEngine
             }*/
         }
         #endregion
+
         #region Search
         private void CheckUp()
         {

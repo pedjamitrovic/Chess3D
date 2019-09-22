@@ -602,7 +602,7 @@ PlayerSettings:
   cloudServicesEnabled:
     UNet: 1
   facebookSdkVersion: 7.9.4
-  apiCompatibilityLevel: 2
+  apiCompatibilityLevel: 3
   cloudProjectId: 79ad7f3a-b5b9-4b29-bd58-ab8966d5ed4e
   projectName: Chess 3D
   organizationId: pedjamitrovic
