@@ -27,13 +27,12 @@ namespace Assets.Project.ChessEngine.Pieces
             if (queue.Count > 0)
             {
                 piece = queue.Dequeue();
-                piece.Square = square;
             }
             else
             {
                 piece = Piece.CreatePiece(pieceIndex, square);
-                piece.Square = square;
             }
+            piece.Square = square;
             return piece;
         }
 

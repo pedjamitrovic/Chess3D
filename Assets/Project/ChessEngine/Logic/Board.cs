@@ -11,6 +11,7 @@ namespace Assets.Project.ChessEngine
     {
         #region Properties
         private PieceFactory pieceFactory;
+
         public Piece[] Pieces { get; set; } // 120 board rep
         public Bitboard[] Pawns { get; set; }
         public Square[] Kings { get; set; }
@@ -1176,44 +1177,44 @@ namespace Assets.Project.ChessEngine
 
         #region Evaluation
         private static readonly int[] PawnPositionValue = {
-        0   ,   0   ,   0   ,   0   ,   0   ,   0   ,   0   ,   0   ,
-        10  ,   10  ,   0   ,   -10 ,   -10 ,   0   ,   10  ,   10  ,
-        5   ,   0   ,   0   ,   5   ,   5   ,   0   ,   0   ,   5   ,
-        0   ,   0   ,   10  ,   20  ,   20  ,   10  ,   0   ,   0   ,
-        5   ,   5   ,   5   ,   10  ,   10  ,   5   ,   5   ,   5   ,
-        10  ,   10  ,   10  ,   20  ,   20  ,   10  ,   10  ,   10  ,
-        20  ,   20  ,   20  ,   30  ,   30  ,   20  ,   20  ,   20  ,
-        0   ,   0   ,   0   ,   0   ,   0   ,   0   ,   0   ,   0
+        0  ,  0  ,  0  ,  0   ,  0   ,  0   ,  0   ,  0  ,
+        10 ,  10 ,  0  ,  -10 ,  -10 ,  0   ,  10  ,  10 ,
+        5  ,  0  ,  0  ,  5   ,  5   ,  0   ,  0   ,  5  ,
+        0  ,  0  ,  10 ,  20  ,  20  ,  10  ,  0   ,  0  ,
+        5  ,  5  ,  5  ,  10  ,  10  ,  5   ,  5   ,  5  ,
+        10 ,  10 ,  10 ,  20  ,  20  ,  10  ,  10  ,  10 ,
+        20 ,  20 ,  20 ,  30  ,  30  ,  20  ,  20  ,  20 ,
+        0  ,  0  ,  0  ,  0   ,  0   ,  0   ,  0   ,  0
         };
         private static readonly int[] KnightPositionValue = {
-        0   ,   -10 ,   0   ,   0   ,   0   ,   0   ,   -10 ,   0   ,
-        0   ,   0   ,   0   ,   5   ,   5   ,   0   ,   0   ,   0   ,
-        0   ,   0   ,   10  ,   10  ,   10  ,   10  ,   0   ,   0   ,
-        0   ,   0   ,   10  ,   20  ,   20  ,   10  ,   5   ,   0   ,
-        5   ,   10  ,   15  ,   20  ,   20  ,   15  ,   10  ,   5   ,
-        5   ,   10  ,   10  ,   20  ,   20  ,   10  ,   10  ,   5   ,
-        0   ,   0   ,   5   ,   10  ,   10  ,   5   ,   0   ,   0   ,
-        0   ,   0   ,   0   ,   0   ,   0   ,   0   ,   0   ,   0
+        0  ,  -10 ,  0   ,  0   ,  0   ,  0   ,  -10 ,  0  ,
+        0  ,  0   ,  0   ,  5   ,  5   ,  0   ,  0   ,  0  ,
+        0  ,  0   ,  10  ,  10  ,  10  ,  10  ,  0   ,  0  ,
+        0  ,  0   ,  10  ,  20  ,  20  ,  10  ,  5   ,  0  ,
+        5  ,  10  ,  15  ,  20  ,  20  ,  15  ,  10  ,  5  ,
+        5  ,  10  ,  10  ,  20  ,  20  ,  10  ,  10  ,  5  ,
+        0  ,  0   ,  5   ,  10  ,  10  ,  5   ,  0   ,  0  ,
+        0  ,  0   ,  0   ,  0   ,  0   ,  0   ,  0   ,  0   
         };
         private static readonly int[] BishopPositionValue = {
-        0   ,   0   ,   -10 ,   0   ,   0   ,   -10 ,   0   ,   0   ,
-        0   ,   0   ,   0   ,   10  ,   10  ,   0   ,   0   ,   0   ,
-        0   ,   0   ,   10  ,   15  ,   15  ,   10  ,   0   ,   0   ,
-        0   ,   10  ,   15  ,   20  ,   20  ,   15  ,   10  ,   0   ,
-        0   ,   10  ,   15  ,   20  ,   20  ,   15  ,   10  ,   0   ,
-        0   ,   0   ,   10  ,   15  ,   15  ,   10  ,   0   ,   0   ,
-        0   ,   0   ,   0   ,   10  ,   10  ,   0   ,   0   ,   0   ,
-        0   ,   0   ,   0   ,   0   ,   0   ,   0   ,   0   ,   0
+        0  ,  0   ,  -10 ,  0   ,  0   ,  -10 ,  0   ,  0  ,
+        0  ,  0   ,  0   ,  10  ,  10  ,  0   ,  0   ,  0  ,
+        0  ,  0   ,  10  ,  15  ,  15  ,  10  ,  0   ,  0  ,
+        0  ,  10  ,  15  ,  20  ,  20  ,  15  ,  10  ,  0  ,
+        0  ,  10  ,  15  ,  20  ,  20  ,  15  ,  10  ,  0  ,
+        0  ,  0   ,  10  ,  15  ,  15  ,  10  ,  0   ,  0  ,
+        0  ,  0   ,  0   ,  10  ,  10  ,  0   ,  0   ,  0  ,
+        0  ,  0   ,  0   ,  0   ,  0   ,  0   ,  0   ,  0 
         };
         private static readonly int[] RookPositionValue = {
-        0   ,   0   ,   5   ,   10  ,   10  ,   5   ,   0   ,   0   ,
-        0   ,   0   ,   5   ,   10  ,   10  ,   5   ,   0   ,   0   ,
-        0   ,   0   ,   5   ,   10  ,   10  ,   5   ,   0   ,   0   ,
-        0   ,   0   ,   5   ,   10  ,   10  ,   5   ,   0   ,   0   ,
-        0   ,   0   ,   5   ,   10  ,   10  ,   5   ,   0   ,   0   ,
-        0   ,   0   ,   5   ,   10  ,   10  ,   5   ,   0   ,   0   ,
-        25  ,   25  ,   25  ,   25  ,   25  ,   25  ,   25  ,   25  ,
-        0   ,   0   ,   5   ,   10  ,   10  ,   5   ,   0   ,   0
+        0  ,  0   ,  5   ,  10  ,  10  ,  5  ,  0  ,  0  ,
+        0  ,  0   ,  5   ,  10  ,  10  ,  5  ,  0  ,  0  ,
+        0  ,  0   ,  5   ,  10  ,  10  ,  5  ,  0  ,  0  ,
+        0  ,  0   ,  5   ,  10  ,  10  ,  5  ,  0  ,  0  ,
+        0  ,  0   ,  5   ,  10  ,  10  ,  5  ,  0  ,  0  ,
+        0  ,  0   ,  5   ,  10  ,  10  ,  5  ,  0  ,  0  ,
+        25 ,  25  ,  25  ,  25  ,  25  ,  25 ,  25 ,  25 ,
+        0  ,  0   ,  5   ,  10  ,  10  ,  5  ,  0  ,  0
         };
         private static readonly int[] Mirror64 = {
         56  ,   57  ,   58  ,   59  ,   60  ,   61  ,   62  ,   63  ,
@@ -1292,6 +1293,20 @@ namespace Assets.Project.ChessEngine
                 score -= RookPositionValue[Mirror(Sq64((int)square))];
             }
 
+            //queens
+            pieceIndex = Queen.GetIndex(Color.White);
+            foreach (Piece piece in PieceList.GetList(pieceIndex))
+            {
+                Square square = piece.Square;
+                score += BishopPositionValue[Sq64((int)square)];
+            }
+            pieceIndex = Queen.GetIndex(Color.Black);
+            foreach (Piece piece in PieceList.GetList(pieceIndex))
+            {
+                Square square = piece.Square;
+                score -= BishopPositionValue[Mirror(Sq64((int)square))];
+            }
+
             if (OnTurn == Color.White) return score;
             else return -score;
         }
@@ -1311,13 +1326,6 @@ namespace Assets.Project.ChessEngine
                     MvvLvaScores[vic, att] = VictimScore[vic] + 6 - (VictimScore[att] / 100);
                 }
             }
-            /*for (int vic = 1; vic < Constants.PieceTypeCount; ++vic)
-            {
-                for (int att = 1; att < Constants.PieceTypeCount; ++att)
-                {
-                    Console.WriteLine("Attacker: {0} -> Victim {1} = Score {2}", Piece.GetLabelFromPieceIndex(att), Piece.GetLabelFromPieceIndex(vic), MvvLvaScores[vic, att]);
-                }
-            }*/
         }
         #endregion
 
@@ -1357,6 +1365,7 @@ namespace Assets.Project.ChessEngine
             for (int currentDepth = 1; currentDepth <= info.DepthLimit; ++currentDepth) // iterative deepening
             {
                 bestScore = AlphaBeta(-Constants.Infinity, Constants.Infinity, currentDepth, info);
+
                 GetPvLine(currentDepth);
                 bestMove = PvMoves.Count > 0 ? PvMoves[0] : null;
 
@@ -1378,7 +1387,6 @@ namespace Assets.Project.ChessEngine
         private int AlphaBeta(int alpha, int beta, int depth, SearchInfo info)
         {
             ++info.NodesVisited;
-
             if (depth == 0) return EvaluatePosition();
 
             if (IsRepetition() || FiftyMove >= 100) return 0; // draw
@@ -1401,12 +1409,13 @@ namespace Assets.Project.ChessEngine
                 score = -AlphaBeta(-beta, -alpha, depth - 1, info);
                 UndoMove();
 
+                if (score >= beta)
+                {
+                    return beta;
+                }
+
                 if (score > alpha)
                 {
-                    if (score >= beta)
-                    {
-                        return beta;
-                    }
                     alpha = score;
                     bestMove = move;
                 }
