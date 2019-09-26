@@ -61,6 +61,7 @@ namespace Assets.Project.ChessEngine
             StateKey = 0;
 
             History = new LinkedList<UndoMove>();
+            PvTable = new PvTable();
         }
         /* Parses FEN string in order and inits Board with parsed values. */
         public Board(string fen) : this()
@@ -1346,7 +1347,7 @@ namespace Assets.Project.ChessEngine
         }
         private void PrepareForSearch()
         {
-            PvTable = new PvTable();
+            PvTable.Clear();
             Ply = 0;
             stopwatch.Reset();
         }
@@ -1360,7 +1361,7 @@ namespace Assets.Project.ChessEngine
             int bestScore = -Constants.Infinity;
             
             StringBuilder sb = new StringBuilder();
-
+            
             stopwatch.Start();
             for (int currentDepth = 1; currentDepth <= info.DepthLimit; ++currentDepth) // iterative deepening
             {
