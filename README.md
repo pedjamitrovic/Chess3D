@@ -1,3 +1,10 @@
 # Chess3D
-3D chess game playable in a PvP or PvE mode. The goal is to develop a decent AI player. 
-Currently working on development of a bug free chess engine. Implemented in C#, Unity Engine.
+3D chess game playable in a PvP or PvE mode. 
+
+Developed decent AI player for amateur gameplay. 
+
+Implemented bug free chess engine. PERFT tested.
+
+Implemented in C#, Unity Engine.
+
+![alt text](https://github.com/pedjamitrovic/Chess3D/blob/master/Documentation/pictures/mateinthree1.png?raw=true)
